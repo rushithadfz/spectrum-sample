@@ -1,0 +1,195 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}Month-End Close &middot; Spectrum Incentive Portal{% endblock %}
+
+{% block content %}
+
+<div class="page-head-row">
+  <div>
+    <p class="sec-eyebrow">{{ region }} &middot; {{ period.period }}</p>
+    <h1 class="page-h1">Month-End Close</h1>
+    <p class="muted mb0">Freeze the numbers, clear every exception, hand the total to payroll.</p>
+  </div>
+  <div class="ranking-pill">
+    <span class="rk-label">Status</span>
+    <b>{{ period.get_status_display }}</b>
+  </div>
+</div>
+
+{% if messages %}
+  {% for m in messages %}
+    <div class="alert {% if m.tags == 'error' %}err{% else %}ok{% endif %}">{{ m }}</div>
+  {% endfor %}
+{% endif %}
+
+<!-- The three steps, and where this period sits -->
+<ol class="close-steps" data-reveal>
+  <li class="{% if period.status != 'Open' %}done{% else %}now{% endif %}">
+    <span class="cs-n">1</span>
+    <span class="cs-body">
+      <b>Clear exceptions</b>
+      <span>{% if blocked %}{{ pending|length }} still open &middot; {{ held|money }} held{% else %}Nothing held{% endif %}</span>
+    </span>
+  </li>
+  <li class="{% if period.status == 'Approved' %}done{% elif period.status == 'Calculated' %}done{% elif not blocked %}now{% endif %}">
+    <span class="cs-n">2</span>
+    <span class="cs-body">
+      <b>Calculate</b>
+      <span>
+        {% if period.calculated_on %}
+          {{ period.calculated_by.full_name }} &middot; {{ period.calculated_on|date:"M j, H:i" }}
+        {% else %}Not yet run{% endif %}
+      </span>
+    </span>
+  </li>
+  <li class="{% if period.status == 'Approved' %}done{% elif period.status == 'Calculated' %}now{% endif %}">
+    <span class="cs-n">3</span>
+    <span class="cs-body">
+      <b>Approve for payroll</b>
+      <span>
+        {% if period.approved_on %}
+          {{ period.approved_by.full_name }} &middot; {{ period.approved_on|date:"M j, H:i" }}
+        {% else %}Locked once approved{% endif %}
+      </span>
+    </span>
+  </li>
+</ol>
+
+<div class="split" style="margin-top:18px">
+  <div class="stack">
+
+    <!-- What the period owes -->
+    <section class="card" data-reveal>
+      <div class="card-head">
+        <h2>{% if period.status == 'Open' %}What calculating would produce{% else %}Frozen figures{% endif %}</h2>
+        <span class="small muted">{{ headcount }} agents</span>
+      </div>
+      <div class="card-pad">
+        <div class="close-total">
+          <span class="ct-label">Total for payroll</span>
+          <span class="ct-value">
+            {% if period.status == 'Open' %}{{ preview_total|money }}{% else %}{{ period.total|money }}{% endif %}
+          </span>
+        </div>
+
+        <ul class="close-breakdown">
+          <li>
+            <span>Agent payouts</span>
+            <b>{% if period.status == 'Open' %}{{ preview_payouts|money }}{% else %}{{ period.agent_payouts|money }}{% endif %}</b>
+          </li>
+          <li>
+            <span>Approved sales</span>
+            <b>{% if period.status == 'Open' %}{{ preview_sales|money }}{% else %}{{ period.approved_sales|money }}{% endif %}</b>
+          </li>
+          <li>
+            <span>Committed by approved plans</span>
+            <b>{% if period.status == 'Open' %}{{ preview_plans|money }}{% else %}{{ period.plan_commitments|money }}{% endif %}</b>
+          </li>
+        </ul>
+
+        {% if period.status != 'Open' %}
+          <p class="small muted" style="margin:14px 0 0">
+            These figures were frozen when the period was calculated. Later
+            changes to sales or plans will not move them.
+          </p>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- What is blocking -->
+    {% if pending %}
+    <section class="card" data-reveal>
+      <div class="card-head">
+        <h2>Blocking the close</h2>
+        <span class="small muted">{{ pending|length }} open</span>
+      </div>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>Agent</th><th>Flag</th><th class="num">Held</th><th>Detail</th></tr></thead>
+          <tbody>
+            {% for e in pending %}
+              <tr>
+                <td class="nowrap">
+                  <div class="person">
+                    <span class="avatar sm">{{ e.agent.initials }}</span>
+                    <span><b>{{ e.agent.full_name }}</b><br>
+                      <span class="small muted">{{ e.agent.team.name }}</span></span>
+                  </div>
+                </td>
+                <td class="nowrap"><span class="badge amber">{{ e.kind }}</span></td>
+                <td class="num money">{{ e.amount|money }}</td>
+                <td><span class="small">{{ e.detail }}</span></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="card-pad">
+        <a class="btn btn-ghost btn-sm" href="{% url 'portal:spend' %}">Decide them on Spend &rsaquo;</a>
+      </div>
+    </section>
+    {% endif %}
+  </div>
+
+  <div class="stack">
+    <section class="card" data-reveal>
+      <div class="card-head"><h2>Actions</h2></div>
+      <div class="card-pad">
+
+        {% if period.is_locked %}
+          <div class="alert ok" style="margin:0 0 12px">
+            Approved by {{ period.approved_by.full_name }} on
+            {{ period.approved_on|date:"M j, Y" }}. This period is locked.
+          </div>
+          {% if period.note %}
+            <p class="small muted">&ldquo;{{ period.note }}&rdquo;</p>
+          {% endif %}
+
+        {% else %}
+          <form method="post">
+            {% csrf_token %}
+            <button class="btn btn-dark btn-block" name="action" value="calculate"
+                    type="submit" {% if blocked %}disabled{% endif %}>
+              {% if period.status == 'Open' %}Run calculation{% else %}Recalculate{% endif %}
+            </button>
+          </form>
+          {% if blocked %}
+            <p class="small muted" style="margin:10px 0 0">
+              {{ pending|length }} exception(s) are still open. Clearing them first
+              stops the total changing after payroll has seen it.
+            </p>
+          {% endif %}
+
+          {% if period.can_approve %}
+            <form method="post" style="margin-top:16px">
+              {% csrf_token %}
+              <div class="field">
+                <label for="closeNote">Note for the record (optional)</label>
+                <input type="text" id="closeNote" name="note"
+                       placeholder="e.g. Q3 true-up applied">
+              </div>
+              <button class="btn btn-primary btn-block" name="action" value="approve"
+                      type="submit"
+                      data-confirm="Approve {{ period.total|money }} for payroll? This locks the period.">
+                Approve for payroll
+              </button>
+            </form>
+          {% endif %}
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="card card-pad">
+      <h3>Why the order matters</h3>
+      <ul class="spec-mini" style="margin-bottom:0">
+        <li><span>Exceptions first</span><span>Held money moves the total</span></li>
+        <li><span>Then calculate</span><span>Figures are frozen</span></li>
+        <li><span>Then approve</span><span>Payroll receives it</span></li>
+        <li><span>After that</span><span>Nothing can change</span></li>
+      </ul>
+    </section>
+  </div>
+</div>
+
+{% endblock %}

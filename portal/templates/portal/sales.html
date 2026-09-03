@@ -1,0 +1,189 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}{% if is_queue %}Sales Approvals{% else %}Log a Sale{% endif %} &middot; Spectrum Incentive Portal{% endblock %}
+
+{% block content %}
+
+<div class="page-head-row">
+  <div>
+    <p class="sec-eyebrow">{% if is_queue %}Action needed{% else %}Your sales{% endif %}</p>
+    <h1 class="page-h1">{% if is_queue %}Sales Approvals{% else %}Log a Sale{% endif %}</h1>
+    <p class="muted mb0">
+      {% if is_queue %}
+        Every sale your agents logged. Nothing pays until you sign it off.
+      {% else %}
+        Log what you sold. Your team lead approves the incentive before it pays.
+      {% endif %}
+    </p>
+  </div>
+  <div class="ranking-pill">
+    <span class="rk-label">{% if is_queue %}Awaiting you{% else %}Awaiting lead{% endif %}</span>
+    <b>{{ awaiting_count }}</b>
+  </div>
+</div>
+
+{% if messages %}{% for m in messages %}<div class="alert ok">{{ m }}</div>{% endfor %}{% endif %}
+
+<div class="kpi-row" data-reveal>
+  {% include "portal/_kpi.html" with label="Approved incentive" value=approved_total|money icon="&#9989;" tone="green" sub="signed off and payable" %}
+  {% include "portal/_kpi.html" with label="Awaiting approval" value=pending_total|money icon="&#8987;" tone="amber" sub="not payable yet" %}
+  {% include "portal/_kpi.html" with label="Sales logged" value=sales|length icon="&#128722;" tone="blue" sub="this period" %}
+</div>
+
+{% if is_queue and awaiting %}
+<div class="sec-head">
+  <div class="sec-eyebrow">Action needed</div>
+  <h2>Awaiting your sign-off</h2>
+  <p class="small muted mb0">{{ awaiting|length }} sale(s) &middot; {{ pending_total|money }} held</p>
+</div>
+
+<div class="grid grid-2" data-reveal>
+  {% for s in awaiting %}
+    <article class="card card-pad plan-card">
+      <div class="offer-eyebrow">
+        <span class="badge {{ s.approval_class }}">{{ s.get_approval_display }}</span>
+        <span class="tag">{{ s.offer.category }}</span>
+      </div>
+      <h3>{{ s.offer.name }}</h3>
+      <p class="small muted">
+        {{ s.order_no }} &middot; {{ s.agent.full_name }} &middot; {{ s.customer }}
+        &middot; {{ s.sold_on|date:"M j, Y" }}
+      </p>
+      <p class="small detail">
+        {{ s.units }} unit(s) &mdash; commission {{ s.base|money }}
+        {% if s.spiff %}plus SPIFF {{ s.spiff|money }}{% endif %}
+        &rarr; <b>{{ s.incentive_value|money }}</b>
+      </p>
+
+      <form method="post" class="decide-form">
+        {% csrf_token %}
+        <input type="hidden" name="order" value="{{ s.order_no }}">
+        <input type="text" name="note" aria-label="Note back to {{ s.agent.first_name }}"
+               placeholder="Note back to {{ s.agent.first_name }} (optional)">
+        <div class="decide-row">
+          <button class="btn btn-primary btn-sm" name="decide" value="approve" type="submit">Approve incentive</button>
+          <button class="btn btn-ghost btn-sm danger" name="decide" value="reject" type="submit">Reject</button>
+        </div>
+      </form>
+    </article>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="split" style="margin-top:18px">
+  <div class="stack">
+    <div class="card" data-reveal>
+      <div class="card-head">
+        <h2>{% if is_queue %}All sales across your teams{% else %}Your logged sales{% endif %}</h2>
+        <span class="small muted">{{ sales|length }} total</span>
+      </div>
+      <div class="table-wrap">
+        <table class="tbl" data-sortable>
+          <thead>
+            <tr>
+              {% if is_queue %}<th>Agent</th>{% endif %}
+              <th>Order</th><th>Offer</th><th>Customer</th>
+              <th class="num">Incentive</th><th>Approval</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in sales %}
+              <tr>
+                {% if is_queue %}
+                  <td class="nowrap">
+                    <div class="person">
+                      <span class="avatar sm">{{ s.agent.initials }}</span>
+                      <span><b>{{ s.agent.full_name }}</b><br>
+                        <span class="small muted">{{ s.agent.team.name }}</span></span>
+                    </div>
+                  </td>
+                {% endif %}
+                <td class="nowrap">
+                  <b>{{ s.order_no }}</b><br>
+                  <span class="small muted">{{ s.sold_on|date:"M j, Y" }}</span>
+                </td>
+                <td>{{ s.offer.name }}<br>
+                  <span class="small muted">{{ s.units }} unit(s)</span></td>
+                <td>{{ s.customer }}</td>
+                <td class="num money" data-sort="{{ s.incentive_value }}">{{ s.incentive_value|money }}</td>
+                <td>
+                  <span class="badge {{ s.approval_class }}">{{ s.get_approval_display }}</span>
+                  {% if s.decision_note %}
+                    <div class="small muted" style="margin-top:4px">
+                      &ldquo;{{ s.decision_note }}&rdquo;
+                      {% if s.decided_by %}&mdash; {{ s.decided_by.full_name }}{% endif %}
+                    </div>
+                  {% elif s.decided_by %}
+                    <div class="small muted" style="margin-top:4px">by {{ s.decided_by.full_name }}</div>
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="empty">
+                {% if is_queue %}No sales logged by your agents yet.{% else %}You have not logged a sale yet.{% endif %}
+              </td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="stack">
+    {% if not is_queue %}
+    <section class="card" data-reveal>
+      <div class="card-head"><h2>Log a sale</h2></div>
+      <form method="post" class="card-pad dispute-form">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="alert err">{{ form.non_field_errors }}</div>
+        {% endif %}
+        {% for field in form %}
+          <div class="field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<div class="field-err">{{ field.errors|first }}</div>{% endif %}
+          </div>
+        {% endfor %}
+        <div class="payout-preview" id="payoutPreview" hidden>
+          <div class="pp-head">
+            <span class="pp-label">This sale is worth</span>
+            <span class="pp-amount" id="ppAmount">$0.00</span>
+          </div>
+          <div class="pp-split">
+            <span>Commission <b id="ppBase">$0.00</b></span>
+            <span>SPIFF <b id="ppSpiff">$0.00</b></span>
+            <span class="pp-units">x<b id="ppUnits">1</b></span>
+          </div>
+          <div class="pp-note">Paid once your team lead approves it.</div>
+        </div>
+
+        <button class="btn btn-primary btn-block" name="log_sale" value="1" type="submit">
+          Log this sale
+        </button>
+        <p class="small muted" style="margin:12px 0 0">
+          The incentive is calculated from the offer, so you never type the
+          money. It goes to your team lead and pays once approved.
+        </p>
+      </form>
+    </section>
+    {% endif %}
+
+    <section class="card card-pad">
+      <h3>How approval works</h3>
+      <ul class="spec-mini" style="margin-bottom:0">
+        <li><span>1. Agent logs</span><span>Awaiting lead</span></li>
+        <li><span>2. Lead reviews</span><span>Approve or reject</span></li>
+        <li><span>3. Approved</span><span>Counts toward payout</span></li>
+        <li><span>Rejected</span><span>Earns nothing</span></li>
+      </ul>
+    </section>
+  </div>
+</div>
+
+{% if not is_queue %}
+<script id="offerRates" type="application/json">{{ offer_rates|safe }}</script>
+{% endif %}
+
+{% endblock %}

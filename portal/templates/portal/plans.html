@@ -1,0 +1,108 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+{% block title %}Incentive Plans &middot; Spectrum Incentive Portal{% endblock %}
+{% block content %}
+
+<div class="page-head-row">
+  <div>
+    <h1 class="page-h1">{% if agent.is_manager %}Approval Queue{% else %}My Incentive Plans{% endif %}</h1>
+    <p class="muted mb0">
+      {% if agent.is_manager %}Plans your team leads have sent for approval{% else %}Draft a plan and send it to your manager{% endif %}
+    </p>
+  </div>
+  <a class="btn btn-primary" href="{% url 'portal:plan_new' %}">+ New plan</a>
+</div>
+
+{% if messages %}{% for m in messages %}<div class="alert ok">{{ m }}</div>{% endfor %}{% endif %}
+
+{% if awaiting %}
+<div class="sec-head">
+  <div class="sec-eyebrow">Action needed</div>
+  <h2>Awaiting approval</h2>
+  <p class="small muted mb0">{{ awaiting|length }} to review</p>
+</div>
+<div class="grid grid-2" data-reveal>
+  {% for p in awaiting %}
+    <article class="card card-pad plan-card">
+      <div class="offer-eyebrow">
+        <span class="badge {{ p.status_class }}">{{ p.get_status_display }}</span>
+        <span class="tag">{{ p.team.name }}</span>
+      </div>
+      <h3>{{ p.name }}</h3>
+      <p class="small muted">By {{ p.created_by.full_name }} &middot; {{ p.created|date:"M j" }}</p>
+      <ul class="spec-mini">
+        <li><span>Product</span><span>{{ p.product }}</span></li>
+        <li><span>Reward</span><span>{{ p.cost_per_unit_label }}</span></li>
+        <li><span>Target</span><span>{{ p.target_units }} units</span></li>
+        <li><span>Runs</span><span>{{ p.runs_from|date:"M j" }} &ndash; {{ p.runs_to|date:"M j" }}</span></li>
+        <li><span>Est. cost if fully paid</span><span><b>{{ p.estimated_cost|money }}</b></span></li>
+      </ul>
+      <p class="small detail"><b>Rationale:</b> {{ p.rationale }}</p>
+
+      {% if agent.is_manager %}
+        <form method="post" action="{% url 'portal:plan_decide' p.pk %}" class="decide-form">
+          {% csrf_token %}
+          <input type="text" name="note" aria-label="Note back to the lead"
+                 placeholder="Note back to the lead (optional)">
+          <div class="decide-row">
+            <button class="btn btn-primary btn-sm" name="decision" value="approve" type="submit">Approve</button>
+            <button class="btn btn-ghost btn-sm danger" name="decision" value="reject" type="submit">Reject</button>
+          </div>
+        </form>
+      {% else %}
+        <p class="small muted mb0">Waiting on {{ p.team.manager.full_name }}.</p>
+      {% endif %}
+    </article>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="sec-head"><div class="sec-eyebrow">Everything</div><h2>All plans</h2></div>
+<div class="card" data-reveal>
+  <div class="table-wrap">
+    <table class="tbl" data-sortable>
+      <thead><tr><th>Plan</th><th>Team</th><th>Product</th><th>Reward</th>
+                 <th class="num">Est. cost</th><th>Status</th><th data-nosort></th></tr></thead>
+      <tbody>
+        {% for p in plans %}
+          <tr>
+            <td>
+              <b>{{ p.name }}</b>
+              <span class="ver">v{{ p.version }}</span>
+              {% if p.cloned_from %}<span class="small muted">&nbsp;from v{{ p.cloned_from.version }}</span>{% endif %}
+              <br><span class="small muted">by {{ p.created_by.full_name }}</span>
+            </td>
+            <td class="nowrap">{{ p.team.name }}</td>
+            <td>{{ p.product }}</td>
+            <td class="nowrap">{{ p.cost_per_unit_label }}</td>
+            <td class="num money" data-sort="{{ p.estimated_cost }}">{{ p.estimated_cost|money }}</td>
+            <td>
+              <span class="badge {{ p.status_class }}">{{ p.get_status_display }}</span>
+              {% if p.decision_note %}<br><span class="small muted">{{ p.decision_note }}</span>{% endif %}
+            </td>
+            <td class="right nowrap">
+              {% if p.is_editable and p.created_by == agent %}
+                <a class="btn btn-ghost btn-sm" href="{% url 'portal:plan_edit' p.pk %}">Edit</a>
+                <form method="post" action="{% url 'portal:plan_submit' p.pk %}" class="inline-form">
+                  {% csrf_token %}
+                  <button class="btn btn-primary btn-sm" type="submit">Send</button>
+                </form>
+              {% else %}
+                {# A decided plan is never edited - it is cloned to a new version. #}
+                <form method="post" action="{% url 'portal:plan_clone' p.pk %}" class="inline-form">
+                  {% csrf_token %}
+                  <button class="btn btn-ghost btn-sm" type="submit"
+                          title="Copy into a new draft version">Clone</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="empty">No plans yet. Start from a trend on the Buying Trends page.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

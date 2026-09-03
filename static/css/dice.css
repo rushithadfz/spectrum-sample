@@ -1,0 +1,145 @@
+/* ============================================================
+   THE DAILY ROLL - a real cube.
+
+   Six faces placed in 3D space and rotated to land on the one the
+   server already chose. Not a flat square that swaps its pips:
+   the sides are visible as it turns, which is what sells it.
+
+   Body is Spectrum blue; the pips are a lighter blue so they read
+   against it without going white.
+   ============================================================ */
+
+.roll {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 14px; margin: 8px 0 18px;
+}
+
+.die-btn {
+  background: none; border: 0; padding: 0; font: inherit;
+  position: relative; cursor: pointer;
+  width: 88px; height: 88px;
+  perspective: 520px;              /* the depth the cube turns in */
+}
+.die-btn:disabled { cursor: default; }
+.die-btn:focus-visible { outline: 2px solid #0073d1; outline-offset: 6px; border-radius: 12px; }
+
+.die-stage { display: block; width: 100%; height: 100%; }
+
+.cube {
+  position: relative; display: block;
+  width: 72px; height: 72px; margin: 8px auto;
+  transform-style: preserve-3d;
+  transform: rotateX(-18deg) rotateY(24deg);
+  transition: transform 1.15s cubic-bezier(.2,.85,.25,1);
+}
+
+/* ---------- The six faces ---------- */
+.face {
+  position: absolute; inset: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 5px; padding: 9px;
+  border-radius: 13px;
+  background: linear-gradient(158deg, #0f81e4 0%, #0073d1 45%, #00539b 100%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.16);
+  backface-visibility: hidden;
+}
+.face i { border-radius: 50%; background: transparent; }
+
+/* Pips: lighter blue, raised slightly so they read as carved. */
+.face i.on {
+  background: #8ec9f0;
+  box-shadow: inset 0 -1px 1px rgba(0,48,87,.45);
+}
+
+/* 36px is half the cube, so each face sits flush on its own side. */
+.f1 { transform: translateZ(36px); }
+.f6 { transform: rotateY(180deg) translateZ(36px); }
+.f2 { transform: rotateY(90deg)   translateZ(36px); }
+.f5 { transform: rotateY(-90deg)  translateZ(36px); }
+.f3 { transform: rotateX(90deg)   translateZ(36px); }
+.f4 { transform: rotateX(-90deg)  translateZ(36px); }
+
+/* Which pips are inked on each face, in the usual arrangement. */
+.f1 i:nth-child(5),
+.f2 i:nth-child(3), .f2 i:nth-child(7),
+.f3 i:nth-child(3), .f3 i:nth-child(5), .f3 i:nth-child(7),
+.f4 i:nth-child(1), .f4 i:nth-child(3), .f4 i:nth-child(7), .f4 i:nth-child(9),
+.f5 i:nth-child(1), .f5 i:nth-child(3), .f5 i:nth-child(5),
+.f5 i:nth-child(7), .f5 i:nth-child(9),
+.f6 i:nth-child(1), .f6 i:nth-child(3), .f6 i:nth-child(4),
+.f6 i:nth-child(6), .f6 i:nth-child(7), .f6 i:nth-child(9) {
+  background: #8ec9f0;
+  box-shadow: inset 0 -1px 1px rgba(0,48,87,.45);
+}
+
+/* ---------- Landing ----------
+   The inverse of each face's own placement brings it to the viewer. */
+.roll[data-face="1"] .cube { transform: rotateX(0deg)   rotateY(0deg); }
+.roll[data-face="2"] .cube { transform: rotateX(0deg)   rotateY(-90deg); }
+.roll[data-face="3"] .cube { transform: rotateX(-90deg) rotateY(0deg); }
+.roll[data-face="4"] .cube { transform: rotateX(90deg)  rotateY(0deg); }
+.roll[data-face="5"] .cube { transform: rotateX(0deg)   rotateY(90deg); }
+.roll[data-face="6"] .cube { transform: rotateX(0deg)   rotateY(180deg); }
+
+/* Before the roll it sits at a three-quarter angle, so you can see it is a cube. */
+.roll.is-ready .cube { transform: rotateX(-18deg) rotateY(24deg); }
+
+/* ---------- Tumbling ---------- */
+.roll.is-rolling .cube {
+  animation: cubeTumble 1.15s cubic-bezier(.28,.6,.3,1) forwards;
+  transition: none;
+}
+@keyframes cubeTumble {
+  0%   { transform: rotateX(-18deg)  rotateY(24deg); }
+  100% { transform: rotateX(-738deg) rotateY(1104deg); }   /* several whole turns */
+}
+
+/* A shadow that reacts, so the cube feels like it left the table. */
+.die-btn::after {
+  content: ""; position: absolute; left: 50%; bottom: -2px;
+  width: 46px; height: 7px; transform: translateX(-50%);
+  background: rgba(0,27,51,.20); border-radius: 50%;
+  filter: blur(3px); transition: all .5s ease;
+}
+.roll.is-rolling .die-btn::after { width: 26px; opacity: .35; }
+
+/* ---------- Waiting ---------- */
+.die-hint {
+  position: absolute; inset: 0; display: grid; place-content: center;
+  font-size: 10.5px; font-weight: 800; line-height: 1.25; text-align: center;
+  color: #fff; text-transform: uppercase; letter-spacing: .07em;
+  text-shadow: 0 1px 3px rgba(0,27,51,.55);
+  pointer-events: none;
+}
+.roll:not(.is-ready) .die-hint { display: none; }
+.roll.is-ready .die-stage { animation: dieWaiting 2.6s ease-in-out infinite; }
+@keyframes dieWaiting {
+  0%, 100% { transform: translateY(0); }
+  55%      { transform: translateY(-4px); }
+}
+.die-btn:hover .cube { filter: brightness(1.06); }
+
+/* ---------- Settled ---------- */
+.roll.is-settled .cube { animation: none; }
+.roll-caption { margin: 0; font-size: 13px; color: #5b6b7b; min-height: 20px; text-align: center; }
+.roll-result { color: #0073d1; font-weight: 700; font-size: 15px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cube, .roll.is-rolling .cube, .roll.is-ready .die-stage { animation: none; transition: none; }
+}
+
+
+/* ---------- Making the landing certain ----------
+   backface-visibility alone was not reliable here: the front and back
+   faces are coplanar once the cube turns a half-turn, and the wrong one
+   painted on top - the caption said six while the cube showed one.
+   Once it has settled, show only the face that was actually rolled. */
+.roll.is-settled .face { opacity: 0; transition: none; }
+.roll.is-settled[data-face="1"] .f1,
+.roll.is-settled[data-face="2"] .f2,
+.roll.is-settled[data-face="3"] .f3,
+.roll.is-settled[data-face="4"] .f4,
+.roll.is-settled[data-face="5"] .f5,
+.roll.is-settled[data-face="6"] .f6 { opacity: 1; }

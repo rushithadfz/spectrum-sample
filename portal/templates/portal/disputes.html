@@ -1,0 +1,191 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}Disputes &middot; Spectrum Incentive Portal{% endblock %}
+
+{% block content %}
+
+<div class="page-head-row">
+  <div>
+    <h1 class="page-h1">{% if is_queue %}Dispute Queue{% else %}Disputes{% endif %}</h1>
+    <p class="muted mb0">
+      {% if is_queue %}Everything raised by the people below you{% else %}Raise and track payout disputes{% endif %}
+    </p>
+  </div>
+  <div class="ranking-pill">
+    <span class="rk-label">Open</span>
+    <b>{{ open_count }} awaiting action</b>
+  </div>
+</div>
+
+{% if decided %}
+  <div class="alert ok">Dispute <b>{{ decided }}</b> has been decided. The agent can see your note.</div>
+{% endif %}
+
+{% if raised %}
+  <div class="alert ok" data-toast="Dispute {{ raised }} raised">
+    Dispute <b>{{ raised }}</b> has been raised. You will get an update once it is reviewed.
+  </div>
+{% endif %}
+
+{% if is_queue and awaiting %}
+<div class="sec-head">
+  <div class="sec-eyebrow">Action needed</div>
+  <h2>Awaiting your sign-off</h2>
+  <p class="small muted mb0">{{ awaiting|length }} raised by your agents</p>
+</div>
+
+<div class="grid grid-2" data-reveal>
+  {% for t in awaiting %}
+    <article class="card card-pad plan-card">
+      <div class="offer-eyebrow">
+        <span class="badge {{ t.status_class }}">{{ t.get_status_display }}</span>
+        <span class="badge {{ t.priority_class }}">{{ t.priority }}</span>
+        <span class="tag">{{ t.category }}</span>
+      </div>
+      <h3>{{ t.subject }}</h3>
+      <p class="small muted">
+        {{ t.ticket_no }} &middot; {{ t.agent.full_name }} &middot; {{ t.raised_on|date:"M j" }}
+      </p>
+      {% if t.detail %}<p class="small detail">{{ t.detail }}</p>{% endif %}
+
+      <form method="post" class="decide-form">
+        {% csrf_token %}
+        <input type="hidden" name="ticket" value="{{ t.ticket_no }}">
+        <input type="text" name="note" aria-label="Note back to {{ t.agent.first_name }}"
+               placeholder="Note back to {{ t.agent.first_name }} (optional)">
+        <div class="decide-row">
+          <button class="btn btn-primary btn-sm" name="decide" value="approve" type="submit">Approve</button>
+          <button class="btn btn-ghost btn-sm danger" name="decide" value="reject" type="submit">Reject</button>
+        </div>
+      </form>
+    </article>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="split">
+  <div class="stack">
+
+    <form class="filters" method="get" role="search">
+      <select name="category" data-autofilter aria-label="Filter by category">
+        {% for c in categories %}<option {% if c == category %}selected{% endif %}>{{ c }}</option>{% endfor %}
+      </select>
+      <select name="priority" data-autofilter aria-label="Filter by priority">
+        {% for p in priorities %}<option {% if p == priority %}selected{% endif %}>{{ p }}</option>{% endfor %}
+      </select>
+      <div class="search">
+        <input id="filterInput" type="search" name="q" value="{{ query }}"
+               placeholder="Search tickets" autocomplete="off" aria-label="Search tickets">
+        <kbd class="slash-hint" aria-hidden="true">/</kbd>
+      </div>
+      <button class="btn btn-dark btn-sm" type="submit" data-filter-submit>Search</button>
+      <span class="result-count"><b id="resultCount">{{ visible }}</b> tickets</span>
+    </form>
+
+    <div class="card" data-reveal>
+      <div class="table-wrap">
+        <table class="tbl" data-sortable>
+          <thead>
+            <tr>
+              {% if is_queue %}<th>Agent</th>{% endif %}
+              <th>Subject</th><th>Category</th><th>Priority</th><th>Status</th>
+              {% if not is_queue %}<th data-nosort>Actions</th>{% endif %}
+            </tr>
+          </thead>
+          <tbody data-filter-root>
+            {% for t in tickets %}
+              <tr data-cat="{{ t.category }}" data-search="{{ t.search_blob }}"{% if t.is_hidden %} hidden{% endif %}>
+                {% if is_queue %}
+                  <td class="nowrap">
+                    <div class="person">
+                      <span class="avatar sm">{{ t.agent.initials }}</span>
+                      <span><b>{{ t.agent.full_name }}</b><br>
+                        <span class="small muted">{{ t.agent.team.name }}</span></span>
+                    </div>
+                  </td>
+                {% endif %}
+                <td>
+                  <b>{{ t.subject }}</b><br>
+                  <span class="small muted">{{ t.ticket_no }} &middot; {{ t.raised_on|date:"M j, Y" }}</span>
+                </td>
+                <td>{{ t.category }}</td>
+                <td><span class="badge {{ t.priority_class }}">{{ t.priority }}</span></td>
+                <td>
+                  <span class="badge {{ t.status_class }}">{{ t.get_status_display }}</span>
+                  {% if t.decision_note %}
+                    <div class="small muted" style="margin-top:4px">
+                      &ldquo;{{ t.decision_note }}&rdquo;
+                      {% if t.decided_by %}&mdash; {{ t.decided_by.full_name }}{% endif %}
+                    </div>
+                  {% elif t.decided_by %}
+                    <div class="small muted" style="margin-top:4px">by {{ t.decided_by.full_name }}</div>
+                  {% endif %}
+                </td>
+                {% if not is_queue %}
+                  <td>
+                    <form method="post" class="inline-form"
+                          data-confirm="Delete &quot;{{ t.subject|escapejs }}&quot;? This cannot be undone.">
+                      {% csrf_token %}
+                      <input type="hidden" name="delete" value="{{ t.ticket_no }}">
+                      <button class="btn btn-ghost btn-sm danger" type="submit">Delete</button>
+                    </form>
+                  </td>
+                {% endif %}
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="empty">
+                {% if is_queue %}Nothing open across your teams.{% else %}You have no disputes.{% endif %}
+              </td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="card-pad empty" id="emptyState" {% if visible %}hidden{% endif %}>
+        No tickets match those filters.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="stack">
+    {% if not is_queue %}
+    <section class="card" data-reveal>
+      <div class="card-head"><h2>&#9878; Raise a dispute</h2></div>
+      <form method="post" class="card-pad dispute-form">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+          <div class="alert err">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        {% for field in form %}
+          <div class="field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<div class="field-err">{{ field.errors|first }}</div>{% endif %}
+          </div>
+        {% endfor %}
+
+        <button class="btn btn-primary btn-block" type="submit">Submit dispute</button>
+        <p class="small muted" style="margin:12px 0 0">
+          You get a ticket number straight away. Your team lead signs it off
+          before it goes to payouts.
+        </p>
+      </form>
+    </section>
+    {% endif %}
+
+    <section class="card card-pad">
+      <h3>Dispute categories</h3>
+      <ul class="spec-mini" style="margin-bottom:0">
+        <li><span>Commission Error</span><span>Rate or calculation wrong</span></li>
+        <li><span>Bonus / SPIF Not Applied</span><span>Qualified bonus missing</span></li>
+        <li><span>Clawback Dispute</span><span>Chargeback applied in error</span></li>
+        <li><span>Missing Payout</span><span>Credited but never paid</span></li>
+      </ul>
+    </section>
+  </div>
+</div>
+
+{% endblock %}

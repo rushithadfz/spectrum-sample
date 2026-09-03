@@ -1,0 +1,467 @@
+/* ============================================================
+   ARENA - the game layer.
+
+   Premium game UI (Apple Fitness / Xbox / Riot register), not a
+   toy: deep Spectrum-blue surfaces, a real progression HUD, XP
+   that fills, ranks that glow. Energy comes from depth and light,
+   never from cartoon graphics.
+   ============================================================ */
+
+:root {
+  --arena-1:  #041d38;
+  --arena-2:  #072d55;
+  --arena-3:  #0a3f72;
+  --volt:     #35a0ff;
+  --volt-2:   #7fc4f2;
+  --arena-ink:#eaf3fb;
+  --arena-mut:#8fb2d0;
+}
+
+/* ============================================================
+   Player HUD
+   ============================================================ */
+.hud {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  padding: 24px 28px;
+  margin: 0 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  flex-wrap: wrap;
+  color: var(--arena-ink);
+  background:
+    radial-gradient(900px 380px at 8% -30%, rgba(53,160,255,.30), transparent 62%),
+    linear-gradient(140deg, var(--arena-3) 0%, var(--arena-2) 46%, var(--arena-1) 100%);
+  border: 1px solid rgba(127,196,242,.22);
+  box-shadow: 0 2px 6px rgba(4,29,56,.28), 0 24px 60px rgba(4,29,56,.34);
+}
+/* A slow sheen, so the card feels lit rather than printed. */
+.hud-glow {
+  position: absolute; inset: -40% -20% auto -20%; height: 180%;
+  background: linear-gradient(100deg, transparent 38%, rgba(127,196,242,.10) 50%, transparent 62%);
+  animation: hudSheen 7s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes hudSheen {
+  0%, 100% { transform: translateX(-22%); }
+  50%      { transform: translateX(22%); }
+}
+
+.hud-id { display: flex; align-items: center; gap: 20px; position: relative; z-index: 1; }
+
+.hud-lvl { position: relative; width: 96px; height: 96px; flex: none; }
+.hud-ring { width: 96px; height: 96px; display: block; }
+.hud-ring .ring-track { stroke: rgba(255,255,255,.14); }
+.hud-ring .ring-value { stroke: var(--volt); filter: drop-shadow(0 0 8px rgba(53,160,255,.7)); }
+.hud-lvl-num {
+  position: absolute; inset: 0; display: grid; place-content: center;
+  font-size: 32px; font-weight: 800; letter-spacing: -.04em; color: #fff;
+  font-variant-numeric: tabular-nums; text-shadow: 0 2px 12px rgba(0,0,0,.35);
+}
+
+.hud-rank-title {
+  display: inline-block; font-size: 10.5px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .16em; color: var(--volt-2);
+  padding: 4px 10px; border-radius: 999px;
+  background: rgba(53,160,255,.14); border: 1px solid rgba(53,160,255,.34);
+}
+.hud-name {
+  margin: 9px 0 12px; font-size: 27px; font-weight: 700;
+  letter-spacing: -.03em; color: #fff;
+}
+.hud-xp { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.hud-xp-track {
+  width: 260px; max-width: 52vw; height: 9px; border-radius: 999px;
+  background: rgba(255,255,255,.13); overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.3);
+}
+.hud-xp-track > span {
+  display: block; height: 100%; border-radius: 999px; width: 0;
+  background: linear-gradient(90deg, #0073d1, var(--volt) 70%, var(--volt-2));
+  box-shadow: 0 0 14px rgba(53,160,255,.75);
+  animation: xpFill 1.2s cubic-bezier(.22,.68,.28,1) both;
+}
+@keyframes xpFill { from { width: 0 !important; } }
+.hud-xp-text {
+  font-size: 12px; color: var(--arena-mut); font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud-stats { display: flex; gap: 10px; flex-wrap: wrap; position: relative; z-index: 1; }
+.hud-stat {
+  min-width: 92px; padding: 12px 15px; border-radius: 14px; text-align: center;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.12);
+  backdrop-filter: blur(6px);
+  transition: transform .18s ease, background-color .18s ease, border-color .18s ease;
+}
+.hud-stat:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,.11);
+  border-color: rgba(127,196,242,.42);
+}
+.hs-val {
+  display: block; font-size: 24px; font-weight: 800; color: #fff;
+  letter-spacing: -.035em; font-variant-numeric: tabular-nums; line-height: 1.05;
+}
+.hs-key {
+  display: block; margin-top: 4px; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .1em; color: var(--arena-mut);
+}
+.hud-stat.streak .hs-val { color: #ffb44d; text-shadow: 0 0 16px rgba(255,180,77,.45); }
+.hud-stat.season .hs-val { color: var(--volt-2); }
+
+@media (max-width: 900px) {
+  .hud { padding: 20px; gap: 18px; }
+  .hud-name { font-size: 22px; }
+  .hud-lvl, .hud-ring { width: 76px; height: 76px; }
+  .hud-lvl-num { font-size: 25px; }
+  .hud-stats { width: 100%; }
+  .hud-stat { flex: 1 1 calc(50% - 10px); min-width: 0; }
+}
+@media (max-width: 480px) {
+  .hud-id { gap: 14px; }
+  .hud-xp-track { width: 150px; }
+}
+
+/* ============================================================
+   Missions - the quest list, played straight
+   ============================================================ */
+[data-theme="money"] .quest-head h2::before {
+  content: "Missions"; position: absolute; left: -9999px;
+}
+[data-theme="money"] .quest {
+  border-radius: 12px; padding: 12px 14px; border-bottom: 0;
+  border: 1px solid transparent; transition: all .16s ease;
+}
+[data-theme="money"] .quest:hover {
+  background: #f2f8ff; border-color: rgba(0,115,209,.18);
+}
+[data-theme="money"] .quest.done { opacity: .62; }
+[data-theme="money"] .quest-ic {
+  border-radius: 11px; background: linear-gradient(150deg, #eaf2fb, #dbe9f7);
+  border: 1px solid rgba(0,115,209,.20);
+}
+[data-theme="money"] .quest.done .quest-ic {
+  background: linear-gradient(150deg, #e5f5ec, #d5eede); border-color: rgba(15,116,64,.28);
+}
+[data-theme="money"] .quest-track { height: 6px; }
+[data-theme="money"] .quest-track > span {
+  background: linear-gradient(90deg, #0073d1, #35a0ff);
+  box-shadow: 0 0 10px rgba(0,115,209,.4);
+}
+[data-theme="money"] .quest-xp {
+  color: #005ca9; font-weight: 800; font-variant-numeric: tabular-nums;
+}
+[data-theme="money"] .quest-claim {
+  background: linear-gradient(180deg, #1a86e8, #0073d1);
+  box-shadow: 0 2px 10px rgba(0,115,209,.36);
+  font-weight: 700; letter-spacing: .01em;
+}
+
+/* ============================================================
+   Achievements - locked reads as locked
+   ============================================================ */
+[data-theme="money"] .medallions .badge-tile { transition: transform .18s ease; }
+[data-theme="money"] .medallions .badge-tile.earned .badge-ic {
+  background: linear-gradient(150deg, #eaf2fb, #d7e8f8);
+  border: 1px solid rgba(0,115,209,.42);
+  box-shadow: 0 2px 8px rgba(0,115,209,.20), inset 0 1px 0 rgba(255,255,255,.9);
+}
+[data-theme="money"] .medallions .badge-tile:not(.earned) { opacity: 1; }
+[data-theme="money"] .medallions .badge-tile:not(.earned) .badge-ic {
+  background: #f0f0ee; border: 1px dashed rgba(16,20,26,.20);
+  filter: grayscale(1) opacity(.30);
+}
+[data-theme="money"] .medallions .badge-tile:not(.earned) .badge-name {
+  color: var(--faint);
+}
+[data-theme="money"] .medallions .badge-tile.earned:hover { transform: translateY(-3px); }
+
+/* ============================================================
+   The sign-in screen: Spectrum blue, lit
+   The graphite version read as murky and dead.
+   ============================================================ */
+.login-art {
+  background:
+    radial-gradient(1000px 620px at 6% -12%, rgba(53,160,255,.38), transparent 62%),
+    radial-gradient(760px 520px at 98% 110%, rgba(0,115,209,.34), transparent 60%),
+    linear-gradient(155deg, var(--arena-3) 0%, var(--arena-2) 45%, var(--arena-1) 100%) !important;
+}
+.rank-card {
+  border: 1px solid rgba(127,196,242,.24) !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,.32);
+}
+.rank-eyebrow { color: var(--volt-2) !important; }
+.level-badge .ring-fill { stroke: var(--volt) !important; filter: drop-shadow(0 0 8px rgba(53,160,255,.7)); }
+.xp-track > span {
+  background: linear-gradient(90deg, #0073d1, var(--volt) 72%, var(--volt-2)) !important;
+  box-shadow: 0 0 14px rgba(53,160,255,.6) !important;
+}
+.gchip {
+  background: rgba(255,255,255,.09) !important;
+  border: 1px solid rgba(127,196,242,.24) !important;
+}
+.objective { border-left-color: var(--volt) !important; }
+.obj-label { color: var(--volt-2) !important; }
+.marks b { color: #fff; }
+.unlock {
+  background: linear-gradient(180deg, #1a86e8, #0073d1) !important;
+  border-color: #0073d1 !important;
+  box-shadow: 0 2px 8px rgba(0,115,209,.42), 0 10px 30px rgba(0,115,209,.28) !important;
+}
+.unlock:hover { background: linear-gradient(180deg, #0073d1, #005ca9) !important; }
+.persona.on {
+  border-color: rgba(53,160,255,.6) !important;
+  background: rgba(53,160,255,.10) !important;
+  box-shadow: 0 0 0 3px rgba(53,160,255,.16) !important;
+}
+.persona-tick { background: #0073d1 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hud-glow { animation: none; }
+  .hud-xp-track > span { animation: none; }
+  .hud-stat:hover { transform: none; }
+}
+
+
+/* ============================================================
+   Challenge cards
+   A programme is a challenge: a reward, a bar, a clock. The flat
+   version read as a paragraph with a line under it.
+   ============================================================ */
+[data-theme="money"] .program {
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+  padding: 0; border-radius: 16px;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+[data-theme="money"] .program:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(16,20,26,.09), 0 22px 48px rgba(16,20,26,.12);
+  border-color: rgba(0,115,209,.30);
+}
+/* A colour-coded spine: blue live, amber closing, red today, green done. */
+[data-theme="money"] .program-accent {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #0073d1, #35a0ff);
+}
+[data-theme="money"] .program[data-days="0"] .program-accent {
+  background: linear-gradient(90deg, #c8102e, #e8536a);
+}
+[data-theme="money"] .program:has(.days.soon) .program-accent {
+  background: linear-gradient(90deg, #8f5600, #d9902a);
+}
+[data-theme="money"] .program[data-complete="1"] .program-accent {
+  background: linear-gradient(90deg, #0f7440, #35b877);
+}
+
+[data-theme="money"] .program-top { padding: 18px 18px 4px; }
+[data-theme="money"] .program-eyebrow {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+[data-theme="money"] .program .code {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--faint); background: var(--raised);
+  padding: 3px 8px; border-radius: 5px; border: 1px solid var(--hair);
+}
+[data-theme="money"] .program h3 { margin: 0 0 6px; font-size: 16px; }
+[data-theme="money"] .program h3 a { color: var(--ink); text-decoration: none; }
+[data-theme="money"] .program:hover h3 a { color: #0073d1; }
+[data-theme="money"] .program .blurb {
+  font-size: 12.5px; color: var(--muted); margin: 0 0 4px; line-height: 1.5;
+}
+
+[data-theme="money"] .program-progress { padding: 10px 18px 16px; margin-top: auto; }
+[data-theme="money"] .program-progress .lbl {
+  font-size: 10px; font-weight: 700; letter-spacing: .11em;
+  text-transform: uppercase; color: var(--faint);
+}
+[data-theme="money"] .program-progress .val {
+  font-size: 15px; font-weight: 700; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+[data-theme="money"] .program-progress .val i {
+  font-style: normal; font-size: 11.5px; font-weight: 500; color: var(--muted);
+}
+[data-theme="money"] .program .bar { height: 8px; margin-top: 7px; background: rgba(16,20,26,.07); }
+[data-theme="money"] .program .bar > span {
+  background: linear-gradient(90deg, #0073d1, #35a0ff);
+  box-shadow: 0 0 10px rgba(0,115,209,.4);
+}
+[data-theme="money"] .program .bar.green > span {
+  background: linear-gradient(90deg, #0f7440, #35b877);
+  box-shadow: 0 0 10px rgba(15,116,64,.4);
+}
+
+[data-theme="money"] .program-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 18px; border-top: 1px solid var(--hair-2);
+  background: linear-gradient(180deg, #fbfcfe, #f6f8fb);
+}
+[data-theme="money"] .program .days {
+  font-size: 12px; font-weight: 600; color: var(--muted);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+[data-theme="money"] .program .days::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--muted);
+}
+[data-theme="money"] .program .days.soon { color: #8f5600; }
+[data-theme="money"] .program .days.soon::before {
+  background: #d9902a; box-shadow: 0 0 0 3px rgba(217,144,42,.20);
+}
+[data-theme="money"] .program .days.urgent { color: #c8102e; font-weight: 700; }
+[data-theme="money"] .program .days.urgent::before {
+  background: #c8102e; animation: urgentPulse 1.6s ease-in-out infinite;
+}
+@keyframes urgentPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(200,16,46,.45); }
+  50%      { box-shadow: 0 0 0 6px rgba(200,16,46,0); }
+}
+[data-theme="money"] .program .reward {
+  font-size: 14px; font-weight: 800; color: #0f7440;
+  font-variant-numeric: tabular-nums;
+  background: #eaf4ee; border: 1px solid rgba(15,116,64,.22);
+  padding: 4px 11px; border-radius: 8px;
+}
+
+/* ---------- Section headers read as stages ---------- */
+[data-theme="money"] .section-title { margin: 30px 0 14px; align-items: flex-end; }
+[data-theme="money"] .section-title h2 {
+  font-size: 17px; display: inline-flex; align-items: center; gap: 9px;
+}
+[data-theme="money"] .section-title h2::before {
+  content: ""; width: 3px; height: 16px; border-radius: 2px; background: #0073d1;
+}
+[data-theme="money"] .section-title .small { color: var(--muted); }
+
+/* Empty states stop being big blank boxes. */
+[data-theme="money"] .card.empty {
+  padding: 26px 20px; border: 1px dashed var(--hair);
+  background: transparent; color: var(--faint);
+  border-radius: 14px; box-shadow: none; text-align: center; font-size: 13px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="money"] .program:hover { transform: none; }
+  [data-theme="money"] .program .days.urgent::before { animation: none; }
+}
+
+
+/* ============================================================
+   THE PALETTE, BACK IN PLACE
+
+   Spectrum blue stays the brand and the primary action. But data
+   needs to be told apart, so the six-tone categorical set applies
+   again: KPI accents, avatars, chart series, channels, categories.
+   ============================================================ */
+
+/* ---- KPI tiles carry the tone the template asked for ---- */
+[data-theme="money"] .kpi { position: relative; overflow: hidden; }
+[data-theme="money"] .kpi::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--tone, #0073d1); display: block;
+}
+[data-theme="money"] .kpi.blue   { --tone: #0073d1; }
+[data-theme="money"] .kpi.teal   { --tone: #00707d; }
+[data-theme="money"] .kpi.violet { --tone: #5d3fa8; }
+[data-theme="money"] .kpi.green  { --tone: #0f7440; }
+[data-theme="money"] .kpi.amber  { --tone: #8f5600; }
+[data-theme="money"] .kpi.red    { --tone: #c8102e; }
+[data-theme="money"] .kpi:hover .kpi-value { color: var(--tone, #0073d1); }
+
+/* Icon chips pick up the same tone. */
+[data-theme="money"] .kpi .kpi-ic,
+[data-theme="money"] .kpi .kpi-icon { color: var(--tone, #0073d1); }
+
+/* ---- People are told apart by hue, not all one blue ---- */
+[data-theme="money"] tbody tr:nth-child(6n+1) .avatar { background: #0073d1; }
+[data-theme="money"] tbody tr:nth-child(6n+2) .avatar { background: #00707d; }
+[data-theme="money"] tbody tr:nth-child(6n+3) .avatar { background: #5d3fa8; }
+[data-theme="money"] tbody tr:nth-child(6n+4) .avatar { background: #a3005f; }
+[data-theme="money"] tbody tr:nth-child(6n+5) .avatar { background: #8f5600; }
+[data-theme="money"] tbody tr:nth-child(6n+6) .avatar { background: #0f7440; }
+[data-theme="money"] .avatar { background: #0073d1; }
+
+/* Roster attainment bars follow their row. */
+[data-theme="money"] tbody tr:nth-child(6n+1) .bar > span { background: #0073d1; }
+[data-theme="money"] tbody tr:nth-child(6n+2) .bar > span { background: #00707d; }
+[data-theme="money"] tbody tr:nth-child(6n+3) .bar > span { background: #5d3fa8; }
+[data-theme="money"] tbody tr:nth-child(6n+4) .bar > span { background: #a3005f; }
+[data-theme="money"] tbody tr:nth-child(6n+5) .bar > span { background: #8f5600; }
+[data-theme="money"] tbody tr:nth-child(6n+6) .bar > span { background: #0f7440; }
+
+/* ---- Channel rows ---- */
+[data-theme="money"] .channel:nth-child(6n+1) .bar > span { background: #0073d1; }
+[data-theme="money"] .channel:nth-child(6n+2) .bar > span { background: #00707d; }
+[data-theme="money"] .channel:nth-child(6n+3) .bar > span { background: #5d3fa8; }
+[data-theme="money"] .channel:nth-child(6n+4) .bar > span { background: #a3005f; }
+[data-theme="money"] .channel:nth-child(6n+5) .bar > span { background: #8f5600; }
+[data-theme="money"] .channel:nth-child(6n+6) .bar > span { background: #0f7440; }
+
+/* ---- Category chips, so Internet / Mobile / TV / Voice differ ---- */
+[data-theme="money"] .tag { border-left: 3px solid #0073d1; border-radius: 6px; }
+[data-theme="money"] .program:nth-child(6n+2) .tag { border-left-color: #00707d; }
+[data-theme="money"] .program:nth-child(6n+3) .tag { border-left-color: #5d3fa8; }
+[data-theme="money"] .program:nth-child(6n+4) .tag { border-left-color: #a3005f; }
+[data-theme="money"] .program:nth-child(6n+5) .tag { border-left-color: #8f5600; }
+
+/* ---- Programme spines cycle too, so a grid of cards is not one colour.
+        Urgency and completion still override, because those mean something. */
+[data-theme="money"] .grid > .program:nth-child(6n+2) .program-accent {
+  background: linear-gradient(90deg, #00707d, #26a5b0);
+}
+[data-theme="money"] .grid > .program:nth-child(6n+3) .program-accent {
+  background: linear-gradient(90deg, #5d3fa8, #8b6cff);
+}
+[data-theme="money"] .grid > .program:nth-child(6n+4) .program-accent {
+  background: linear-gradient(90deg, #a3005f, #d43d8c);
+}
+[data-theme="money"] .grid > .program:nth-child(6n+5) .program-accent {
+  background: linear-gradient(90deg, #8f5600, #d9902a);
+}
+[data-theme="money"] .program:has(.days.soon) .program-accent {
+  background: linear-gradient(90deg, #8f5600, #d9902a) !important;
+}
+[data-theme="money"] .program[data-days="0"] .program-accent {
+  background: linear-gradient(90deg, #c8102e, #e8536a) !important;
+}
+[data-theme="money"] .program[data-complete="1"] .program-accent {
+  background: linear-gradient(90deg, #0f7440, #35b877) !important;
+}
+
+/* ---------- The character, on the player panel ----------
+   It sits between who you are and how you are doing, and says the one
+   thing the page wants you to know. Sized so it reads as a figure - at
+   34px beside a link it was just another icon. */
+.hud-buddy {
+  display: flex; align-items: center; gap: 12px;
+  position: relative; z-index: 1;
+  flex: 1 1 260px; min-width: 0;
+}
+.hud-buddy .ch { flex: none; }
+.buddy-say {
+  margin: 0; min-width: 0;
+  font-size: 13.5px; line-height: 1.45; font-weight: 600;
+  color: #cfe4f6;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(127,196,242,.22);
+  border-radius: 12px;
+  padding: 10px 14px;
+  position: relative;
+}
+/* tail, pointing back at who is speaking */
+.buddy-say::before {
+  content: ""; position: absolute; left: -5px; top: 50%; width: 8px; height: 8px;
+  background: rgba(255,255,255,.07);
+  border-left: 1px solid rgba(127,196,242,.22);
+  border-bottom: 1px solid rgba(127,196,242,.22);
+  transform: translateY(-50%) rotate(45deg);
+}
+@media (max-width: 900px) {
+  .hud-buddy { flex-basis: 100%; }
+}

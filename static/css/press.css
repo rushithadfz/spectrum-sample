@@ -1,0 +1,552 @@
+/* ============================================================
+   SPECTRUM - the portal's own look.
+
+   Spectrum's palette and nothing else: navy chrome, blue as the
+   single accent, white surfaces, light rules, restrained
+   elevation. Typography is Montserrat for display and Hanken
+   Grotesk for UI - the closest free stand-ins for Spectrum's
+   proprietary faces.
+   ============================================================ */
+
+[data-theme="press"] {
+  /* Spectrum palette only. The reference gave the *structure* -
+     flat ink, hard edges, dot grid - not the colours. */
+  --paper:     #ffffff;
+  --paper-2:   #e8f3fc;
+  --ink:       #001b33;
+  --ink-2:     #21384f;
+  --muted:     #5b6b7b;
+  --faint:     #78889a;
+
+  --brick:     #c8102e;
+  --pine:      #128a4b;
+  --navy:      #003057;
+  --mustard:   #b26b00;
+  --spectrum:  #0073d1;
+
+  --line:      var(--ink);
+  --line-soft: #d9d0be;
+
+  /* Legacy token remap. */
+  --page-bg: var(--paper); --bg: var(--paper); --white: var(--paper);
+  --blue: var(--spectrum); --blue-dark: #005ca9; --sky: var(--paper-2);
+  --navy-deep: var(--ink);
+  --green: var(--pine); --green-soft: #dcefe5;
+  --red: var(--brick); --red-soft: #f7e3e2;
+  --amber: #b26b00; --amber-soft: #fbeed2;
+  --c-blue: var(--spectrum); --c-teal: var(--pine); --c-violet: var(--navy);
+  --c-magenta: var(--brick); --c-amber: #b26b00; --c-green: var(--pine);
+  --xp: var(--pine);
+
+  --radius: 8px; --radius-lg: 12px;
+  --shadow: none; --shadow-md: none; --shadow-lg: 3px 3px 0 var(--ink);
+  color-scheme: light;
+}
+
+/* ---------- Paper ---------- */
+[data-theme="press"] body,
+[data-theme="press"] body.app {
+  background-color: var(--paper);
+  /* The dot grid is the site's signature texture. */
+  color: var(--ink-2);
+  font-family: "Hanken Grotesk", system-ui, sans-serif;
+  font-size: 14px;
+}
+[data-theme="press"] body.app::before { display: none; }
+
+/* ---------- Type: condensed, uppercase, loud ---------- */
+[data-theme="press"] h1, [data-theme="press"] h2, [data-theme="press"] h3,
+[data-theme="press"] .page-h1, [data-theme="press"] .greet-name,
+[data-theme="press"] .hud-name {
+  font-family: "Montserrat", system-ui, sans-serif;
+  text-transform: none;
+  letter-spacing: -.02em;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: .96;
+}
+[data-theme="press"] h1, [data-theme="press"] .page-h1 { font-size: 38px; }
+[data-theme="press"] h2 { font-size: 23px; }
+[data-theme="press"] h3 { font-size: 18px; }
+[data-theme="press"] .sec-eyebrow, [data-theme="press"] .kpi-label,
+[data-theme="press"] .side-section, [data-theme="press"] .cap,
+[data-theme="press"] .stat-mini .label, [data-theme="press"] table.tbl th {
+  font-family: "Hanken Grotesk", sans-serif;
+  text-transform: uppercase; letter-spacing: .14em;
+  font-size: 10px; font-weight: 700; color: var(--muted);
+}
+[data-theme="press"] .muted { color: var(--muted); }
+
+/* ---------- Chrome ---------- */
+[data-theme="press"] .topbar-blue {
+  background: var(--ink);
+  border-bottom: 1px solid rgba(255,255,255,.10);
+  backdrop-filter: none;
+  box-shadow: none;
+}
+[data-theme="press"] .wordmark-name {
+  font-family: "Montserrat", sans-serif; color: var(--paper);
+  font-weight: 800; letter-spacing: -.03em;
+}
+[data-theme="press"] .wordmark-tick { color: var(--mustard); }
+[data-theme="press"] .wordmark-sub { color: #b8b0a2; border-left-color: #55504a; }
+[data-theme="press"] .user-name { color: var(--paper); }
+[data-theme="press"] .user-role { color: #b8b0a2; }
+[data-theme="press"] .period-btn, [data-theme="press"] .ic-btn,
+[data-theme="press"] .user-pill {
+  background: transparent; border: 1px solid rgba(255,255,255,.28);
+  color: var(--paper); border-radius: 10px;
+}
+[data-theme="press"] .period-btn:hover,
+[data-theme="press"] .ic-btn:hover { background: var(--paper); color: var(--ink); }
+
+[data-theme="press"] .sidebar {
+  background: var(--paper); border-right: 1px solid var(--line-soft);
+}
+[data-theme="press"] .side-nav a {
+  border-radius: 10px; margin: 0 10px; color: var(--ink-2);
+  font-weight: 600; border: 2px solid transparent;
+  letter-spacing: 0; font-size: 13px;
+}
+[data-theme="press"] .side-nav a:hover { background: var(--paper-2); }
+[data-theme="press"] .side-nav a.active {
+  background: var(--spectrum); color: #fff; border-color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0,27,51,.06), 0 6px 18px rgba(0,27,51,.07);
+}
+[data-theme="press"] .side-nav a.active .ic { color: #fff; }
+[data-theme="press"] .side-xp { border: 1px solid var(--line-soft); border-radius: 10px; background: var(--paper-2); }
+[data-theme="press"] .lvl-dot { background: var(--brick); color: var(--paper); border-radius: 10px; }
+
+/* ---------- Every panel is a printed block ---------- */
+[data-theme="press"] .card, [data-theme="press"] .kpi,
+[data-theme="press"] .program, [data-theme="press"] .product,
+[data-theme="press"] .stat-panel, [data-theme="press"] .tier-card,
+[data-theme="press"] .plan-card, [data-theme="press"] .team-card {
+  background: var(--paper);
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0,27,51,.06), 0 6px 18px rgba(0,27,51,.07);
+}
+[data-theme="press"] .card:hover, [data-theme="press"] .kpi:hover,
+[data-theme="press"] .program:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 1px 2px rgba(0,27,51,.06), 0 6px 18px rgba(0,27,51,.07);
+}
+[data-theme="press"] .card-head {
+  background: var(--ink); border-bottom: 0; padding: 11px 18px;
+}
+
+/* KPI tiles: solid ink blocks, cycled through the press palette. */
+[data-theme="press"] .kpi-row { gap: 14px; }
+[data-theme="press"] .kpi { padding: 16px 18px; }
+[data-theme="press"] .kpi::before { display: none; }
+[data-theme="press"] .kpi-value {
+  font-family: "Montserrat", sans-serif; font-size: 32px; font-weight: 700;
+  color: var(--ink); letter-spacing: .01em;
+}
+[data-theme="press"] .kpi.blue   { background: var(--spectrum); }
+[data-theme="press"] .kpi.teal   { background: var(--pine); }
+[data-theme="press"] .kpi.violet { background: var(--navy); }
+[data-theme="press"] .kpi.green  { background: var(--pine); }
+[data-theme="press"] .kpi.amber  { background: var(--mustard); }
+[data-theme="press"] .kpi.red    { background: var(--brick); }
+[data-theme="press"] .kpi.blue *, [data-theme="press"] .kpi.teal *,
+[data-theme="press"] .kpi.violet *, [data-theme="press"] .kpi.green *,
+[data-theme="press"] .kpi.red * { color: var(--paper) !important; }
+[data-theme="press"] .kpi.amber * { color: var(--ink) !important; }
+[data-theme="press"] .kpi-chip { background: transparent; border: 0; }
+
+/* ---------- The earnings block ---------- */
+[data-theme="press"] .stat-panel { padding: 26px 28px; }
+[data-theme="press"] .stat-panel::before { display: none; }
+[data-theme="press"] .stat-hero .amount {
+  font-family: "Montserrat", sans-serif; font-size: 76px; font-weight: 700;
+  letter-spacing: .004em; color: var(--ink);
+}
+[data-theme="press"] .stat-hero .cur { color: var(--brick); font-family: "Montserrat", sans-serif; }
+[data-theme="press"] .delta-pill {
+  background: var(--pine); color: var(--paper); border: 1px solid var(--line-soft);
+  border-radius: 10px; box-shadow: 0 1px 2px rgba(0,27,51,.06), 0 6px 18px rgba(0,27,51,.07); font-weight: 700;
+}
+[data-theme="press"] .stat-mini {
+  background: var(--paper-2); border: 1px solid var(--line-soft);
+  border-radius: 10px; box-shadow: none;
+}
+[data-theme="press"] .stat-mini .value {
+  font-family: "Montserrat", sans-serif; font-size: 24px; color: var(--ink); font-weight: 700;
+}
+[data-theme="press"] .stat-track, [data-theme="press"] .bar,
+[data-theme="press"] .quest-track, [data-theme="press"] .tier-track,
+[data-theme="press"] .xp-mini-track {
+  background: var(--paper-2); border: 1px solid var(--line-soft);
+  border-radius: 10px; height: 14px; overflow: hidden;
+}
+[data-theme="press"] .stat-track > span, [data-theme="press"] .bar > span,
+[data-theme="press"] .quest-track > span, [data-theme="press"] .tier-track > span,
+[data-theme="press"] .xp-mini-track > span {
+  background: var(--spectrum); border-radius: 10px; box-shadow: none;
+}
+
+/* ---------- Chart ---------- */
+[data-theme="press"] .area-chart .area-line { stroke: var(--brick); stroke-width: 3; }
+[data-theme="press"] .area-chart .fill-top { stop-color: var(--brick); stop-opacity: .18; }
+[data-theme="press"] .area-chart .fill-bottom { stop-color: var(--brick); stop-opacity: 0; }
+[data-theme="press"] .pt-dot { background: var(--paper); border: 3px solid var(--ink); }
+[data-theme="press"] .area-pt.now .pt-dot, [data-theme="press"] .area-pt.active .pt-dot {
+  background: var(--brick); box-shadow: none;
+}
+[data-theme="press"] .pt-tip {
+  background: var(--ink); color: var(--paper); border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,27,51,.20); font-weight: 700;
+}
+[data-theme="press"] .dot-key { background: var(--brick); box-shadow: none; }
+
+/* ---------- The HUD becomes a printed banner ---------- */
+[data-theme="press"] .hud {
+  background: var(--ink);
+  border: 1px solid var(--line-soft); border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,27,51,.14), 0 16px 40px rgba(0,27,51,.18);
+  color: var(--paper);
+}
+[data-theme="press"] .hud-glow { display: none; }
+[data-theme="press"] .hud-name { color: var(--paper); font-size: 34px; }
+[data-theme="press"] .hud-rank-title {
+  background: var(--mustard); color: var(--ink); border: 1px solid rgba(255,255,255,.28);
+  border-radius: 10px; font-weight: 800;
+}
+[data-theme="press"] .hud-ring .ring-track { stroke: #4a4642; }
+[data-theme="press"] .hud-ring .ring-value { stroke: var(--mustard); filter: none; }
+[data-theme="press"] .hud-lvl-num { font-family: "Montserrat", sans-serif; font-weight: 700; text-shadow: none; }
+[data-theme="press"] .hud-xp-track {
+  background: #4a4642; border: 1px solid rgba(255,255,255,.28); border-radius: 10px; height: 14px;
+}
+[data-theme="press"] .hud-xp-track > span {
+  background: var(--mustard); box-shadow: none; border-radius: 10px;
+}
+[data-theme="press"] .hud-xp-text { color: #d8d0c2; }
+[data-theme="press"] .hud-stat {
+  background: transparent; border: 1px solid rgba(255,255,255,.28);
+  border-radius: 10px; backdrop-filter: none;
+}
+[data-theme="press"] .hud-stat:hover { background: var(--paper); transform: none; }
+[data-theme="press"] .hud-stat:hover * { color: var(--ink) !important; }
+[data-theme="press"] .hs-val { font-family: "Montserrat", sans-serif; font-weight: 700; color: var(--paper); }
+[data-theme="press"] .hud-stat.streak .hs-val { color: var(--mustard); text-shadow: none; }
+[data-theme="press"] .hud-stat.season .hs-val { color: var(--mustard); }
+[data-theme="press"] .hs-key { color: #b8b0a2; }
+
+/* ---------- Buttons: hard blocks ---------- */
+[data-theme="press"] .btn {
+  border-radius: 10px; border: 1px solid var(--line-soft);
+  box-shadow: 0 1px 2px rgba(0,27,51,.06), 0 6px 18px rgba(0,27,51,.07); font-weight: 700;
+  text-transform: uppercase; letter-spacing: .05em; font-size: 12px;
+}
+[data-theme="press"] .btn:hover { transform: translateY(-1px); box-shadow: 0 1px 2px rgba(0,27,51,.06), 0 6px 18px rgba(0,27,51,.07); }
+[data-theme="press"] .btn:active { transform: translateY(0); box-shadow: 0 1px 2px rgba(0,27,51,.06), 0 6px 18px rgba(0,27,51,.07); }
+[data-theme="press"] .btn-primary { background: var(--spectrum); color: #fff; }
+[data-theme="press"] .btn-dark { background: var(--ink); color: var(--paper); }
+[data-theme="press"] .btn-ghost { background: var(--paper); color: var(--ink); }
+[data-theme="press"] .btn.danger, [data-theme="press"] .btn-ghost.danger {
+  background: var(--brick); color: var(--paper); border-color: var(--ink);
+}
+
+/* ---------- Forms ---------- */
+[data-theme="press"] input, [data-theme="press"] select, [data-theme="press"] textarea {
+  background: var(--paper); border: 1px solid var(--line-soft);
+  border-radius: 10px; color: var(--ink); font-family: "Hanken Grotesk", sans-serif;
+}
+[data-theme="press"] input:focus, [data-theme="press"] select:focus {
+  outline: none; box-shadow: 0 0 0 3px rgba(0,115,209,.16); border-color: var(--ink);
+}
+[data-theme="press"] :where(a,button,input,select,textarea,[tabindex]):focus-visible {
+  outline: 3px solid var(--brick); outline-offset: 2px;
+}
+
+/* ---------- Tables ---------- */
+[data-theme="press"] table.tbl th {
+  background: var(--ink); color: var(--paper); border-bottom: 0;
+}
+[data-theme="press"] table.tbl td { border-bottom: 1px solid var(--line-soft); }
+[data-theme="press"] table.tbl tbody tr:nth-child(even) { background: var(--paper-2); }
+[data-theme="press"] table.tbl tbody tr:hover { background: #ffe9b8; }
+
+/* ---------- Badges and chips ---------- */
+[data-theme="press"] .badge, [data-theme="press"] .tag, [data-theme="press"] .code {
+  border-radius: 10px; border: 1px solid var(--line-soft); box-shadow: none;
+  font-weight: 700; text-transform: uppercase; letter-spacing: .06em; font-size: 10px;
+  background: var(--paper); color: var(--ink);
+}
+[data-theme="press"] .badge.green, [data-theme="press"] .badge.ok { background: var(--pine); color: var(--paper); }
+[data-theme="press"] .badge.amber, [data-theme="press"] .badge.warn { background: var(--mustard); color: var(--ink); }
+[data-theme="press"] .badge.red, [data-theme="press"] .badge.err { background: var(--brick); color: var(--paper); }
+[data-theme="press"] .badge.blue { background: var(--spectrum); color: #fff; }
+
+/* ---------- Programme cards ---------- */
+[data-theme="press"] .program-accent { height: 0; display: none; }
+[data-theme="press"] .program-foot {
+  background: var(--paper-2); border-top: 1px solid var(--line-soft);
+}
+[data-theme="press"] .program .reward {
+  background: var(--mustard); color: var(--ink);
+  border: 1px solid var(--line-soft); border-radius: 10px; box-shadow: none; font-weight: 800;
+}
+[data-theme="press"] .program .days.soon { color: #b26b00; }
+[data-theme="press"] .program .days.urgent { color: var(--brick); }
+[data-theme="press"] .section-title h2::before { width: 14px; height: 14px; border-radius: 10px; }
+[data-theme="press"] .card.empty {
+  border: 1px dashed #c3d0dc; background: transparent; box-shadow: none; color: var(--muted);
+}
+
+/* ---------- Product thumbnails ---------- */
+[data-theme="press"] .product .thumb {
+  border: 1px solid var(--line-soft); border-radius: 10px; background: var(--paper-2);
+}
+[data-theme="press"] .product[data-cat="Internet"]  .thumb { background: #cfe3f6; color: var(--navy); }
+[data-theme="press"] .product[data-cat="Mobile"]    .thumb { background: #d3ece1; color: var(--pine); }
+[data-theme="press"] .product[data-cat="TV"]        .thumb { background: #fbe7c4; color: #b26b00; }
+[data-theme="press"] .product[data-cat="Voice"]     .thumb { background: #f6d9d8; color: var(--brick); }
+[data-theme="press"] .product[data-cat="Equipment"] .thumb { background: var(--paper-2); color: var(--ink); }
+[data-theme="press"] .product[data-cat="Business"]  .thumb { background: #d3ece1; color: var(--pine); }
+
+/* ---------- Assistant + overlays ---------- */
+[data-theme="press"] .ask-fab {
+  background: var(--brick); border: 1px solid var(--line-soft); border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0,27,51,.06), 0 6px 18px rgba(0,27,51,.07);
+}
+[data-theme="press"] .ask-panel, [data-theme="press"] .palette,
+[data-theme="press"] .menu, [data-theme="press"] .arrival-card, [data-theme="press"] .levelup-card {
+  background: var(--paper); border: 1px solid var(--line-soft);
+  border-radius: 10px; box-shadow: 0 1px 2px rgba(0,27,51,.06), 0 6px 18px rgba(0,27,51,.07);
+}
+[data-theme="press"] .alert {
+  border: 1px solid var(--line-soft); border-radius: 10px; box-shadow: 0 1px 2px rgba(0,27,51,.06), 0 6px 18px rgba(0,27,51,.07);
+  background: var(--paper);
+}
+[data-theme="press"] .alert.ok { background: #dcefe5; color: #08462f; }
+[data-theme="press"] .ranking-pill {
+  background: var(--paper); border: 1px solid var(--line-soft);
+  border-radius: 10px; box-shadow: 0 1px 2px rgba(0,27,51,.06), 0 6px 18px rgba(0,27,51,.07);
+}
+[data-theme="press"] .avatar { border-radius: 10px; border: 1px solid var(--line-soft); }
+[data-theme="press"] .tier-rungs li { border-radius: 10px; }
+/* --mustard is now Spectrum's amber #b26b00, which is dark - the row's
+   ink text sat at 2.87:1 on it. Invert the row instead. */
+[data-theme="press"] .tier-rungs li.on {
+  background: var(--spectrum); border: 1px solid var(--line-soft);
+}
+[data-theme="press"] .tier-rungs li.on * { color: #fff; }
+[data-theme="press"] .payout-preview {
+  background: var(--mustard); border: 1px solid var(--line-soft);
+  border-radius: 10px; box-shadow: 0 1px 2px rgba(0,27,51,.06), 0 6px 18px rgba(0,27,51,.07);
+}
+[data-theme="press"] .pp-label, [data-theme="press"] .pp-amount,
+[data-theme="press"] .pp-split, [data-theme="press"] .pp-note { color: var(--ink); }
+[data-theme="press"] .pp-amount { font-family: "Montserrat", sans-serif; font-weight: 700; }
+[data-theme="press"] .pp-split b, [data-theme="press"] .pp-units b { color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="press"] .card:hover, [data-theme="press"] .btn:hover,
+  [data-theme="press"] .program:hover { transform: none; }
+}
+
+
+/* ============================================================
+   Corrections from the contrast + overflow audit
+   ============================================================ */
+
+/* The sidebar progression block was authored white-on-navy. Press
+   puts it on cream paper, so its ink has to flip with it. */
+[data-theme="press"] .side-xp,
+[data-theme="press"] .side-xp *,
+[data-theme="press"] .side-xp-text b { color: var(--ink) !important; }
+[data-theme="press"] .side-xp .xp-mini-label,
+[data-theme="press"] .side-streak { color: var(--muted) !important; }
+[data-theme="press"] .side-xp .lvl-dot { color: var(--paper) !important; }
+[data-theme="press"] .side-streak .flame { color: var(--brick) !important; }
+
+/* Secondary ink was tuned for white, and cream is lighter still. */
+[data-theme="press"] .stat-ytd,
+[data-theme="press"] .sub,
+[data-theme="press"] .stat-mini .sub,
+[data-theme="press"] .kpi-sub,
+[data-theme="press"] .small.muted { color: #5c564d; }
+[data-theme="press"] .enter { color: var(--navy); font-weight: 700; }
+
+/* Montserrat at 92px does not fit a 375px screen. Step the display type
+   down explicitly rather than letting it push the page wide. */
+@media (max-width: 900px) {
+  [data-theme="press"] .stat-hero .amount { font-size: 62px; }
+  [data-theme="press"] h1, [data-theme="press"] .page-h1 { font-size: 36px; }
+  [data-theme="press"] .hud-name { font-size: 26px; }
+}
+@media (max-width: 560px) {
+  [data-theme="press"] .stat-hero .amount { font-size: 40px; }
+  [data-theme="press"] .stat-hero .cur { font-size: 22px; }
+  [data-theme="press"] h1, [data-theme="press"] .page-h1 { font-size: 27px; }
+  [data-theme="press"] h2 { font-size: 18px; }
+  [data-theme="press"] .hud-name { font-size: 21px; }
+  [data-theme="press"] .kpi-value { font-size: 26px; }
+  [data-theme="press"] .tier-name { font-size: 18px; }
+  /* Long uppercase words must be allowed to break rather than overflow. */
+  [data-theme="press"] h1, [data-theme="press"] h2, [data-theme="press"] h3,
+  [data-theme="press"] .page-h1, [data-theme="press"] .hud-name {
+    overflow-wrap: anywhere;
+  }
+  /* The print offsets add width on a narrow screen. */
+  [data-theme="press"] .card, [data-theme="press"] .kpi,
+  [data-theme="press"] .program, [data-theme="press"] .product,
+  [data-theme="press"] .stat-panel, [data-theme="press"] .hud { box-shadow: 0 1px 2px rgba(0,27,51,.06), 0 6px 18px rgba(0,27,51,.07); }
+}
+
+
+/* ============================================================
+   Inversion fixes
+
+   Two surfaces flip polarity in this theme, and the base sheets
+   were written for the opposite one:
+
+     .stat-panel  was dark navy, so its children are white/mint.
+                  Press puts it on cream, so they must go to ink.
+     .card-head   was pale, so its children are dark ink.
+                  Press makes it solid charcoal, so they go light.
+   ============================================================ */
+
+/* The .stat-panel rules that lived here were written when this theme
+   rendered that panel on a light ground. It is a filled dark surface
+   again (see surfaces.css), so inking its children would put navy text
+   on navy. Deliberately removed rather than overridden: the old rule
+   carried three :not() clauses and so outranked the correct one. */
+
+/* The card-head rules that lived here forced white on every descendant,
+   from when the header was a solid charcoal bar. It is a heading over a
+   rule now (see surfaces.css), so that painted white text on white -
+   `.card-head *` reached even a <b> nested inside a caption. Removed at
+   source rather than overridden, so the cascade stays readable. */
+
+
+/* ============================================================
+   Next action
+
+   One directive at the top of the home, derived from real records.
+   It exists because the page was showing a great many figures and
+   answering no question.
+   ============================================================ */
+.next-action {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 14px 18px; margin: 0 0 16px;
+  text-decoration: none !important;
+  border: 1px solid #d6e0ea;
+  box-shadow: 0 1px 2px rgba(0,27,51,.06), 0 6px 18px rgba(0,27,51,.07);
+  background: #fff;
+  transition: transform .14s ease, box-shadow .14s ease;
+}
+.next-action:hover { transform: translateY(-1px); box-shadow: 0 1px 2px rgba(0,27,51,.06), 0 6px 18px rgba(0,27,51,.07); }
+.next-action:active { transform: translateY(0); box-shadow: 0 1px 2px rgba(0,27,51,.06), 0 6px 18px rgba(0,27,51,.07); }
+.na-label {
+  font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .12em; padding: 5px 10px; flex: none;
+  border: 1px solid #d6e0ea; color: #fff;
+}
+.na-text { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; color: #001b33; }
+.na-cta { flex: none; font-size: 13px; font-weight: 700; color: #0073d1; }
+
+.next-action.tone-red    .na-label { background: #c8102e; }
+.next-action.tone-amber  .na-label { background: #b26b00; }
+.next-action.tone-blue   .na-label { background: #0073d1; }
+.next-action.tone-green  .na-label { background: #128a4b; }
+
+@media (max-width: 560px) {
+  .next-action { gap: 8px; padding: 12px 14px; }
+  .na-text { font-size: 13.5px; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .next-action:hover { transform: none; }
+}
+
+
+/* The home grid is a three-column layout from the original design. Press
+   never overrode it, so the earnings panel sat in one narrow column with
+   two empty ones beside it. Two columns: money wide, tier beside it. */
+[data-theme="press"] .home-top {
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+[data-theme="press"] .home-top > .card,
+[data-theme="press"] .home-top > .tier-card { width: auto; margin: 0; }
+@media (max-width: 1000px) {
+  [data-theme="press"] .home-top { grid-template-columns: 1fr; }
+}
+
+
+/* ============================================================
+   Semantic corrections
+
+   The theme originally borrowed a poster palette where brick and
+   mustard were decorative. In this product red means a loss and
+   amber means waiting, so using them for a rising earnings line
+   and for progress was actively misleading. Blue is the accent.
+   ============================================================ */
+
+/* An earnings trend that is going up must not be drawn in red. */
+[data-theme="press"] .area-chart .area-line { stroke: var(--spectrum); }
+[data-theme="press"] .area-chart .fill-top { stop-color: var(--spectrum); stop-opacity: .18; }
+[data-theme="press"] .area-chart .fill-bottom { stop-color: var(--spectrum); stop-opacity: 0; }
+[data-theme="press"] .area-pt.now .pt-dot,
+[data-theme="press"] .area-pt.active .pt-dot { background: var(--spectrum); }
+[data-theme="press"] .dot-key { background: var(--spectrum); }
+[data-theme="press"] .stat-panel .cur { color: var(--spectrum); }
+
+/* Progress is progress, not a warning. */
+[data-theme="press"] .hud-ring .ring-value { stroke: #7fc4f2; }
+[data-theme="press"] .hud-xp-track > span { background: #7fc4f2; }
+[data-theme="press"] .hud-rank-title {
+  background: rgba(127,196,242,.16); color: #bfe0f7;
+  border: 1px solid rgba(127,196,242,.42);
+}
+[data-theme="press"] .hud-stat.streak .hs-val,
+[data-theme="press"] .hud-stat.season .hs-val { color: #7fc4f2; }
+[data-theme="press"] .side-xp .lvl-dot { background: var(--spectrum) !important; }
+[data-theme="press"] .side-streak .flame { color: var(--spectrum) !important; }
+
+/* The assistant is an action, so it takes the action colour. */
+[data-theme="press"] .ask-fab { background: var(--spectrum); }
+
+/* The tier scale had its two endpoints running together. */
+[data-theme="press"] .tier-legend {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--muted); margin-top: 6px;
+}
+[data-theme="press"] .tier-track { height: 10px; }
+[data-theme="press"] .tier-track > span { background: var(--spectrum); }
+[data-theme="press"] .tier-worth {
+  background: #e8f3fc; border: 1px solid #cfe1f2; border-radius: 8px;
+}
+[data-theme="press"] .tw-label { color: #005ca9; }
+[data-theme="press"] .tw-amount { color: var(--pine); }
+
+/* ---------- Arrival card, after the repaint ----------
+   This theme repaints .arrival-card from navy to paper, but its contents
+   kept the colours they were given for the dark card - which left the
+   greeting, the figure and the Level / Streak / Points figures white on
+   white. Colours follow the surface. */
+[data-theme="press"] .arrival-card h2 { color: #001b33; }
+[data-theme="press"] .arrival-card > p { color: #5b6b7b; }
+[data-theme="press"] .arrival-stats b { color: #001b33; }
+[data-theme="press"] .arrival-stats div { color: #5b6b7b; }
+[data-theme="press"] .arrival-card .roll-caption,
+[data-theme="press"] .arrival-card .roll-verb { color: #5b6b7b; }
+[data-theme="press"] .arrival-card .roll-result { color: #001b33; }
+[data-theme="press"] .arrival-xp span { color: #5b6b7b; }
+[data-theme="press"] .arrival-xp #arrivalXp { color: #0073d1; }
+
+[data-theme="press"] .greeter-say {
+  color: #001b33 !important;
+  background: #eaf4fd;
+  border-color: #c5e0f5;
+}
+[data-theme="press"] .greeter-say::before { background: #eaf4fd; border-color: #c5e0f5; }
+
+/* the figure sits on a light card here, which is its default palette -
+   only the shadow needs softening */
+[data-theme="press"] .arrival-card .ch-shadow { fill: rgba(0,27,51,.13); }

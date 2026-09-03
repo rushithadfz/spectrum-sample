@@ -1,0 +1,264 @@
+/* ============================================================
+   FOUR VISUAL DIRECTIONS - one Spectrum palette.
+
+   Every theme below draws from the same brand colours:
+
+     Spectrum blue  #0073d1      navy      #003057
+     deep navy      #001b33      sky       #e8f3fc
+     white          #ffffff      green     #128a4b
+     amber          #b26b00      red       #c8102e
+
+   What changes between them is not the hue - it is which colour
+   carries the page, how the layout is arranged, and how much
+   structure is drawn. Switch with the control in the top bar,
+   or Shift+T.
+   ============================================================ */
+
+:root {
+  --sp-blue:      #0073d1;
+  --sp-blue-lt:   #3596e4;
+  --sp-blue-dk:   #005ca9;
+  --sp-navy:      #003057;
+  --sp-navy-dp:   #001b33;
+  --sp-navy-md:   #002744;
+  --sp-sky:       #e8f3fc;
+  --sp-sky-dp:    #cfe6f8;
+  --sp-white:     #ffffff;
+  --sp-green:     #128a4b;
+  --sp-amber:     #b26b00;
+  --sp-red:       #c8102e;
+
+  --font-ui:   "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-disp: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  --ease: cubic-bezier(.22,.68,.28,1);
+}
+
+/* ============================================================
+   Shared across all four
+   ============================================================ */
+body { font-family: var(--font-ui); }
+h1, h2, h3, h4, .page-h1, .greet-name { font-family: var(--font-disp); letter-spacing: -.025em; }
+
+/* Figures are tabular everywhere - they are the point of this product. */
+.num, .money, .countup, .kpi-value, .rank-big, .chart-val, .mini-num,
+.plan-value, .stat-hero .amount, .stat-mini .value, .arrival-stats b,
+.channel-spend, .quest-xp, td.num, .house-pill {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -.02em;
+}
+.sec-eyebrow, .side-section, .kpi-label, .cap, .stat-mini .label, .rank-label,
+.plan-label, table.tbl th {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: .12em;
+  font-weight: 500;
+}
+
+.side-ic { display: inline-flex; align-items: center; justify-content: center;
+           width: 20px; height: 20px; flex: none; }
+.side-ic .ic { width: 17px; height: 17px; display: block; }
+.side-nav a:hover { transform: none; }
+.badge-tile.earned::after { content: none; }
+.medallions .badge-name { line-height: 1.25; min-height: 2.4em; }
+.house-art { font-size: 46px; }
+#confetti { display: none; }
+main { animation: none; }
+.content { padding-bottom: 104px; }
+.spec-mini li {
+  display: grid; grid-template-columns: minmax(0,1fr) minmax(0,auto);
+  gap: 16px; align-items: baseline; padding: 9px 0;
+}
+.spec-mini li:last-child { border-bottom: 0; }
+.search input { padding-left: 34px; padding-right: 38px; }
+
+/* Style switcher control */
+
+/* ============================================================
+   Legibility pass - findings from the automated contrast audit
+   ============================================================ */
+
+/* Figures that hardcoded navy ink: navy on navy in Command. --ink is
+   defined per style, so this stays correct in all four. */
+.channel-spend, .entity-figure { color: var(--ink); }
+
+/* ============================================================
+   CATEGORICAL PALETTE
+
+   The templates already declare six tones (blue, teal, violet,
+   green, amber, red) on KPI tiles and card icons - the earlier
+   passes collapsed nearly all of them to blue, which is why the
+   product read as monochrome. These restore them, and extend the
+   same six across charts and channel rows so series are told
+   apart by hue rather than by position alone.
+
+   Spectrum blue and navy anchor the set; the other four are
+   tuned to sit with them at equal weight.
+   ============================================================ */
+
+:root {
+  --c-blue:    #0073d1;
+  --c-teal:    #00818f;
+  --c-violet:  #6c4bb6;
+  --c-magenta: #b5006e;
+  --c-amber:   #b26b00;
+  --c-green:   #128a4b;
+  --c-red:     #c8102e;
+}
+
+/* ---- KPI tiles: honour the tone the template asked for ---- */
+.kpi.blue   { --tone: var(--c-blue); }
+.kpi.teal   { --tone: var(--c-teal); }
+.kpi.violet { --tone: var(--c-violet); }
+.kpi.green  { --tone: var(--c-green); }
+.kpi.amber  { --tone: var(--c-amber); }
+.kpi.red    { --tone: var(--c-red); }
+.kpi        { --tone: var(--c-blue); }
+
+.kpi .kpi-ic, .kpi-icon { color: var(--tone); }
+
+/* ---- Card icons ---- */
+.head-ic          { color: var(--c-blue); }
+.head-ic.teal     { color: var(--c-teal); }
+.head-ic.violet   { color: var(--c-violet); }
+.head-ic.amber    { color: var(--c-amber); }
+.head-ic.red      { color: var(--c-red); }
+.head-ic.green    { color: var(--c-green); }
+
+/* ---- Charts: one hue per column, so months and bands read apart ---- */
+.chart .chart-col:nth-child(6n+1) .chart-bar { --tone: var(--c-blue); }
+.chart .chart-col:nth-child(6n+2) .chart-bar { --tone: var(--c-teal); }
+.chart .chart-col:nth-child(6n+3) .chart-bar { --tone: var(--c-violet); }
+.chart .chart-col:nth-child(6n+4) .chart-bar { --tone: var(--c-magenta); }
+.chart .chart-col:nth-child(6n+5) .chart-bar { --tone: var(--c-amber); }
+.chart .chart-col:nth-child(6n+6) .chart-bar { --tone: var(--c-green); }
+/* Over-budget still overrides everything: it is a warning, not a category. */
+.chart-bar.over, [data-theme="command"] .chart-bar.over,
+[data-theme="bento"] .chart-bar.over, [data-theme="swiss"] .chart-bar.over,
+[data-theme="editorial"] .chart-bar.over { background: var(--c-red); }
+
+/* ---- Channel rows and distribution bands ---- */
+.channel:nth-child(6n+1) .bar > span { background: var(--c-blue); }
+.channel:nth-child(6n+2) .bar > span { background: var(--c-teal); }
+.channel:nth-child(6n+3) .bar > span { background: var(--c-violet); }
+.channel:nth-child(6n+4) .bar > span { background: var(--c-magenta); }
+.channel:nth-child(6n+5) .bar > span { background: var(--c-amber); }
+.channel:nth-child(6n+6) .bar > span { background: var(--c-green); }
+.channel:nth-child(6n+1) .entity-ic { color: var(--c-blue); }
+.channel:nth-child(6n+2) .entity-ic { color: var(--c-teal); }
+.channel:nth-child(6n+3) .entity-ic { color: var(--c-violet); }
+.channel:nth-child(6n+4) .entity-ic { color: var(--c-magenta); }
+.channel:nth-child(6n+5) .entity-ic { color: var(--c-amber); }
+.channel:nth-child(6n+6) .entity-ic { color: var(--c-green); }
+
+/* ---- Category tags ---- */
+.tag[data-cat], .badge.cat { border-left: 2px solid var(--c-teal); }
+
+/* Body copy that templates previously inlined as light-mode ink. */
+.detail { color: var(--ink-2); }
+
+/* Avatars carry initials in white, so their fill must always be solid -
+   never left to an unresolved token, or the initials land on the card. */
+.avatar, .avatar.sm, .user-av, .persona-avatar {
+  background: var(--c-blue);
+  color: #fff;
+}
+.avatar.accent-teal, .persona-avatar.accent-teal     { background: var(--c-teal); }
+.avatar.accent-violet, .persona-avatar.accent-violet { background: var(--c-violet); }
+.avatar.accent-amber, .persona-avatar.accent-amber   { background: var(--c-amber); }
+.avatar.accent-green, .persona-avatar.accent-green   { background: var(--c-green); }
+.avatar.accent-red, .persona-avatar.accent-red       { background: var(--c-red); }
+
+/* ============================================================
+   DE-BLUE THE CHROME
+
+   The categorical palette only reached accents, so the page still
+   read as blue: the top bar, the hero tile, every avatar, every
+   progress bar and every button were all one hue.
+
+   Here the *chrome* goes neutral - graphite and paper, which are
+   palette-neutral rather than a second brand colour - and colour
+   is spent only where it carries meaning. Blue becomes one voice
+   among six instead of the ground everything sits on.
+   ============================================================ */
+
+:root {
+  --ink-900: #16191d;
+  --ink-800: #1e232a;
+  --ink-700: #2b3138;
+  --paper:   #f7f7f6;
+  --paper-2: #efefed;
+}
+
+/* ---- Avatars: one hue per row, so a roster is not a column of
+       identical blue discs. Cycling by position is stable for a
+       given list and needs no per-person data. ---- */
+tbody tr:nth-child(6n+1) .avatar, .persona-list li:nth-child(6n+1) .persona-avatar { background: var(--c-blue); }
+tbody tr:nth-child(6n+2) .avatar, .persona-list li:nth-child(6n+2) .persona-avatar { background: var(--c-teal); }
+tbody tr:nth-child(6n+3) .avatar, .persona-list li:nth-child(6n+3) .persona-avatar { background: var(--c-violet); }
+tbody tr:nth-child(6n+4) .avatar, .persona-list li:nth-child(6n+4) .persona-avatar { background: var(--c-magenta); }
+tbody tr:nth-child(6n+5) .avatar, .persona-list li:nth-child(6n+5) .persona-avatar { background: var(--c-amber); }
+tbody tr:nth-child(6n+6) .avatar, .persona-list li:nth-child(6n+6) .persona-avatar { background: var(--c-green); }
+
+/* Roster attainment bars follow their row's hue. */
+tbody tr:nth-child(6n+1) .bar > span { background: var(--c-blue); }
+tbody tr:nth-child(6n+2) .bar > span { background: var(--c-teal); }
+tbody tr:nth-child(6n+3) .bar > span { background: var(--c-violet); }
+tbody tr:nth-child(6n+4) .bar > span { background: var(--c-magenta); }
+tbody tr:nth-child(6n+5) .bar > span { background: var(--c-amber); }
+tbody tr:nth-child(6n+6) .bar > span { background: var(--c-green); }
+
+/* A graphite primary button disappears on a graphite panel. Invert it
+   wherever it sits on a dark surface. */
+.house .btn-primary, .house-card .btn-primary,
+.stat-panel .btn-primary, .kpi:first-child .btn-primary,
+[data-theme="bento"] .house .btn-primary, [data-theme="swiss"] .house .btn-primary {
+  background: #fff; color: var(--ink-900); border-color: #fff;
+}
+.house .btn-primary:hover, .house-card .btn-primary:hover,
+.stat-panel .btn-primary:hover {
+  background: var(--paper-2); border-color: var(--paper-2); color: var(--ink-900);
+}
+.house .btn-ghost, .house-card .btn-ghost, .stat-panel .btn-ghost {
+  border-color: rgba(255,255,255,.32); color: #fff;
+}
+
+/* Avatars carry white initials, so their fills must stay deep enough for
+   white to read. Command lifts the categorical hues for the dark canvas,
+   which is right for bars and stripes but too bright behind text - so
+   avatars use their own fixed, deeper set in every style. */
+:root {
+  --av-1: #0073d1; --av-2: #00707d; --av-3: #5d3fa8;
+  --av-4: #a3005f; --av-5: #8f5600; --av-6: #0f7440;
+}
+tbody tr:nth-child(6n+1) .avatar, .persona-list li:nth-child(6n+1) .persona-avatar { background: var(--av-1); }
+tbody tr:nth-child(6n+2) .avatar, .persona-list li:nth-child(6n+2) .persona-avatar { background: var(--av-2); }
+tbody tr:nth-child(6n+3) .avatar, .persona-list li:nth-child(6n+3) .persona-avatar { background: var(--av-3); }
+tbody tr:nth-child(6n+4) .avatar, .persona-list li:nth-child(6n+4) .persona-avatar { background: var(--av-4); }
+tbody tr:nth-child(6n+5) .avatar, .persona-list li:nth-child(6n+5) .persona-avatar { background: var(--av-5); }
+tbody tr:nth-child(6n+6) .avatar, .persona-list li:nth-child(6n+6) .persona-avatar { background: var(--av-6); }
+.avatar, .avatar.sm, .user-av, .persona-avatar { color: #fff; }
+
+/* ---- Sign-in screen ----
+   The theme rules above target .btn-primary, which also matches the
+   sign-in button, so it has to be restated here or the one slab of
+   blue comes straight back on the first screen. */
+.unlock, [data-theme="command"] .unlock, [data-theme="editorial"] .unlock,
+[data-theme="bento"] .unlock, [data-theme="swiss"] .unlock {
+  background: var(--ink-900); border-color: var(--ink-900); color: #fff;
+}
+.unlock:hover, [data-theme="command"] .unlock:hover {
+  background: var(--ink-700); border-color: var(--ink-700);
+}
+
+/* Selection is shown with a neutral lift and a tick, not a blue fill. */
+.persona.on {
+  border-color: var(--ink-700);
+  background: rgba(127,127,127,.10);
+  box-shadow: 0 0 0 3px rgba(127,127,127,.12);
+}
+.persona-tick { background: var(--c-green); }
+.persona:hover { border-color: var(--ink-700); }

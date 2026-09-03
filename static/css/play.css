@@ -1,0 +1,261 @@
+/* ============================================================
+   PLAY - the interaction and game layer.
+
+   Game feel in the Apple Fitness / Strava register: rings that
+   fill, figures that land, progress you can read at a glance.
+   No stickers, no confetti, nothing that shouts.
+   ============================================================ */
+
+/* ---------- Progress rings ---------- */
+[data-theme="money"] .hero-rings {
+  display: flex; align-items: center; gap: 26px; flex-wrap: wrap;
+  margin-top: 24px; padding-top: 22px;
+  border-top: 1px solid rgba(16,20,26,.07);
+}
+[data-theme="money"] .ring-item { position: relative; width: 84px; height: 84px; flex: none; }
+[data-theme="money"] .ring { width: 84px; height: 84px; display: block; }
+[data-theme="money"] .ring .ring-track { stroke: rgba(16,20,26,.08); }
+[data-theme="money"] .ring .ring-value { stroke: #0073d1; }
+[data-theme="money"] .ring.alt .ring-value { stroke: #0f7440; }
+[data-theme="money"] .ring-mid {
+  position: absolute; inset: 0; display: grid; place-content: center;
+  text-align: center; line-height: 1.1; pointer-events: none;
+}
+[data-theme="money"] .ring-mid b {
+  display: block; font-size: 19px; font-weight: 700; color: var(--ink);
+  letter-spacing: -.03em; font-variant-numeric: tabular-nums;
+}
+[data-theme="money"] .ring-mid b i { font-style: normal; font-size: 12px; color: var(--muted); }
+[data-theme="money"] .ring-mid span {
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--faint); font-weight: 600;
+}
+
+[data-theme="money"] .ring-stat { display: flex; flex-direction: column; gap: 7px; }
+[data-theme="money"] .rs-row { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; }
+[data-theme="money"] .rs-row b {
+  font-size: 15px; font-weight: 700; color: var(--ink);
+  font-variant-numeric: tabular-nums; min-width: 58px;
+}
+[data-theme="money"] .rs-row span { color: var(--muted); }
+
+/* ---------- Live payout preview ---------- */
+[data-theme="money"] .payout-preview {
+  margin: 4px 0 16px;
+  padding: 15px 16px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #f2f8ff, #eaf2fb);
+  border: 1px solid rgba(0,115,209,.20);
+}
+[data-theme="money"] .pp-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+}
+[data-theme="money"] .pp-label {
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em;
+  color: #005ca9; font-weight: 700;
+}
+[data-theme="money"] .pp-amount {
+  font-size: 28px; font-weight: 700; color: #0a2d4c;
+  letter-spacing: -.035em; font-variant-numeric: tabular-nums;
+}
+[data-theme="money"] .pp-split {
+  display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px;
+  font-size: 12px; color: var(--muted);
+}
+[data-theme="money"] .pp-split b { color: var(--ink); font-weight: 600; }
+[data-theme="money"] .pp-units b { color: #005ca9; }
+[data-theme="money"] .pp-note { margin-top: 8px; font-size: 11.5px; color: var(--muted); }
+
+/* Each change registers with a single soft pulse. */
+[data-theme="money"] .payout-preview.pulse { animation: ppPulse .42s ease-out; }
+@keyframes ppPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(0,115,209,.28); }
+  100% { box-shadow: 0 0 0 12px rgba(0,115,209,0); }
+}
+
+/* ---------- Chart interaction ---------- */
+[data-theme="money"] .area-wrap { cursor: crosshair; }
+[data-theme="money"] .area-pt.active .pt-dot {
+  width: 13px; height: 13px; box-shadow: 0 0 0 5px rgba(0,115,209,.18);
+}
+[data-theme="money"] .area-pt.active .pt-tip { opacity: 1; }
+/* With the pointer inside the chart, only the hovered month shows a value. */
+[data-theme="money"] .area-wrap:hover .pt-tip { opacity: 0; }
+[data-theme="money"] .area-wrap:hover .area-pt.active .pt-tip { opacity: 1; }
+[data-theme="money"] .area-wrap:hover .area-pt.now:not(.active) .pt-dot {
+  width: 9px; height: 9px; box-shadow: none;
+}
+
+/* ---------- XP lands ---------- */
+.xp-float {
+  position: fixed; z-index: 9999; pointer-events: none;
+  transform: translate(-50%, 0);
+  font-weight: 700; font-size: 14px; color: #0f7440;
+  text-shadow: 0 1px 0 #fff;
+  animation: xpRise .95s cubic-bezier(.2,.7,.3,1) forwards;
+}
+@keyframes xpRise {
+  0%   { opacity: 0; transform: translate(-50%, 4px) scale(.9); }
+  18%  { opacity: 1; transform: translate(-50%, -6px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -42px) scale(1); }
+}
+
+/* ---------- Press feedback ---------- */
+[data-theme="money"] .btn:active,
+[data-theme="money"] .quest-claim:active { transform: translateY(1px) scale(.99); }
+[data-theme="money"] .quest-claim {
+  transition: background-color .15s ease, transform .12s ease, box-shadow .15s ease;
+}
+[data-theme="money"] .quest-claim:hover {
+  box-shadow: 0 4px 14px rgba(0,115,209,.28); transform: translateY(-1px);
+}
+
+/* Rows and tiles acknowledge the pointer. */
+[data-theme="money"] table.tbl tbody tr:hover { background: #f4f8fd; }
+[data-theme="money"] table.tbl tbody tr:active { background: #eaf2fb; }
+[data-theme="money"] .badge-tile { cursor: default; }
+
+@media (max-width: 760px) {
+  [data-theme="money"] .hero-rings { gap: 18px; }
+  [data-theme="money"] .ring-item, [data-theme="money"] .ring { width: 68px; height: 68px; }
+  [data-theme="money"] .ring-mid b { font-size: 16px; }
+  [data-theme="money"] .pp-amount { font-size: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-float { animation: none; opacity: 0; }
+  [data-theme="money"] .payout-preview.pulse { animation: none; }
+  [data-theme="money"] .quest-claim:hover { transform: none; }
+}
+
+/* Search icon: a real magnifier, sized to the button. */
+.ic-btn .ic { width: 17px; height: 17px; display: block; }
+.ic-btn { display: inline-grid; place-items: center; }
+[data-theme="money"] .ic-btn { color: var(--ink-2); }
+[data-theme="money"] .ic-btn:hover { color: var(--ink); background: var(--raised); }
+
+
+/* ============================================================
+   Tier ladder
+   Replaces the POC's virtual-world panel. Same slot, but it
+   answers a question an agent actually has: what is the next
+   rung, how far away is it, and what does reaching it pay.
+   ============================================================ */
+[data-theme="money"] .tier-card .enter { font-size: 12.5px; font-weight: 600; }
+[data-theme="money"] .tier-now {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+}
+[data-theme="money"] .tier-name {
+  font-size: 22px; font-weight: 700; color: var(--ink); letter-spacing: -.03em;
+}
+[data-theme="money"] .tier-pts {
+  font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums;
+}
+[data-theme="money"] .tier-lead { font-size: 13px; color: var(--muted); margin: 10px 0 8px; }
+[data-theme="money"] .tier-lead b { color: var(--ink); font-weight: 600; }
+
+[data-theme="money"] .tier-track {
+  height: 8px; border-radius: 999px; background: rgba(16,20,26,.08); overflow: hidden;
+}
+[data-theme="money"] .tier-track > span {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, #0073d1, #3596e4);
+  box-shadow: 0 0 12px rgba(0,115,209,.35);
+  transition: width 1.1s cubic-bezier(.22,.68,.28,1);
+}
+[data-theme="money"] .tier-legend {
+  display: flex; justify-content: space-between; margin-top: 6px;
+  font-size: 11px; color: var(--faint); font-variant-numeric: tabular-nums;
+}
+
+[data-theme="money"] .tier-worth {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  margin-top: 14px; padding: 12px 14px; border-radius: 12px;
+  background: #eaf4ee; border: 1px solid rgba(15,116,64,.20);
+}
+[data-theme="money"] .tw-label {
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em;
+  color: #0a5c33; font-weight: 700;
+}
+[data-theme="money"] .tw-amount {
+  font-size: 22px; font-weight: 700; color: #0f7440;
+  letter-spacing: -.03em; font-variant-numeric: tabular-nums;
+}
+
+[data-theme="money"] .tier-rungs { list-style: none; margin: 16px 0 0; padding: 0; }
+[data-theme="money"] .tier-rungs li {
+  display: grid; grid-template-columns: 1fr auto auto; gap: 12px;
+  align-items: baseline; padding: 9px 10px; border-radius: 9px;
+  font-size: 12.5px; color: var(--muted);
+  border: 1px solid transparent;
+}
+[data-theme="money"] .tier-rungs li + li { margin-top: 2px; }
+[data-theme="money"] .tier-rungs .tr-name { font-weight: 600; color: var(--ink-2); }
+[data-theme="money"] .tier-rungs .tr-pts,
+[data-theme="money"] .tier-rungs .tr-pay { font-variant-numeric: tabular-nums; }
+[data-theme="money"] .tier-rungs .tr-pay { color: var(--ink); font-weight: 600; min-width: 56px; text-align: right; }
+
+[data-theme="money"] .tier-rungs li.on {
+  background: #eaf2fb; border-color: rgba(0,115,209,.22);
+}
+[data-theme="money"] .tier-rungs li.on .tr-name { color: #005ca9; }
+[data-theme="money"] .tier-rungs li.next {
+  border-color: rgba(16,20,26,.12); border-style: dashed;
+}
+
+
+/* ============================================================
+   BLUE, USED WELL
+
+   Spectrum blue earns its place by being the one saturated
+   colour on a neutral page - so it always means something:
+   the brand, the live value, the primary action, the focus
+   ring. Everything else stays ink and paper.
+   ============================================================ */
+
+/* ---------- The wordmark is the brand, so it is blue ---------- */
+[data-theme="money"] .wordmark-name {
+  color: #0073d1;
+  font-weight: 800;
+  letter-spacing: -.035em;
+}
+[data-theme="money"] .wordmark-tick { color: #3596e4; }
+[data-theme="money"] .wordmark-sub {
+  color: var(--muted); font-weight: 500;
+  padding-left: 12px; margin-left: 2px;
+  border-left: 1px solid var(--hair);
+}
+
+/* A hairline of brand colour under the whole chrome, so the blue
+   frames the page rather than filling it. */
+[data-theme="money"] .topbar-blue {
+  border-bottom: 1px solid rgba(0,115,209,.16);
+  box-shadow: 0 1px 0 rgba(0,115,209,.06);
+}
+
+/* ---------- Blue marks the live thing ---------- */
+[data-theme="money"] .side-nav a.active {
+  background: linear-gradient(90deg, rgba(0,115,209,.10), rgba(0,115,209,.03));
+  color: #005ca9;
+  box-shadow: inset 2px 0 0 #0073d1;
+}
+[data-theme="money"] .ranking-pill b { color: #005ca9; }
+[data-theme="money"] .sec-eyebrow { color: #0073d1; }
+[data-theme="money"] .card-head h2 { color: var(--ink); }
+
+/* Selected rows and focus states, one consistent blue. */
+[data-theme="money"] :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid #0073d1; outline-offset: 2px;
+}
+[data-theme="money"] a:hover { color: #005ca9; }
+
+/* Links inside prose keep a quiet underline rather than shouting. */
+[data-theme="money"] .card a:not(.btn):not(.enter):not(.side-nav a) {
+  text-decoration-color: rgba(0,115,209,.35);
+  text-underline-offset: 2px;
+}
+
+/* The current month, the current tier, the focused figure: blue.
+   Nothing decorative uses it. */
+[data-theme="money"] .kpi:hover .kpi-value,
+[data-theme="money"] .stat-mini:hover .value { color: #0073d1; }

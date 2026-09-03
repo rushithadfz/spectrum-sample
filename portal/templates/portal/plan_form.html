@@ -1,0 +1,52 @@
+{% extends "portal/base.html" %}
+{% block title %}{% if plan %}Edit plan{% else %}New incentive plan{% endif %}{% endblock %}
+{% block content %}
+
+<div class="page-head-row">
+  <div>
+    <h1 class="page-h1">{% if plan %}Edit plan{% else %}Build an incentive{% endif %}</h1>
+    <p class="muted mb0">Your manager reviews this before it goes live</p>
+  </div>
+  <a class="btn btn-ghost" href="{% url 'portal:plans' %}">Back to plans</a>
+</div>
+
+<div class="split">
+  <div class="stack">
+    <section class="card" data-reveal>
+      <div class="card-head"><h2>Plan details</h2></div>
+      <form method="post" class="card-pad dispute-form">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert err">{{ form.non_field_errors }}</div>{% endif %}
+        {% for field in form %}
+          <div class="field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<div class="small muted" style="margin-top:4px">{{ field.help_text }}</div>{% endif %}
+            {% if field.errors %}<div class="field-err">{{ field.errors|first }}</div>{% endif %}
+          </div>
+        {% endfor %}
+        <div class="decide-row">
+          <button class="btn btn-ghost" type="submit">Save draft</button>
+          <button class="btn btn-primary" type="submit" name="submit_now" value="1">Send for approval</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="card card-pad">
+      <h3>What your manager will see</h3>
+      <ul class="spec-mini" style="margin-bottom:0">
+        <li><span>Estimated cost</span><span>reward &times; target units</span></li>
+        <li><span>Your rationale</span><span>which trend it answers</span></li>
+        <li><span>Who it is for</span><span>the team you picked</span></li>
+      </ul>
+      <p class="small muted" style="margin:12px 0 0">
+        A plan can be edited while it is a draft or after a rejection, but not
+        once it is awaiting approval.
+      </p>
+    </section>
+  </div>
+</div>
+
+{% endblock %}

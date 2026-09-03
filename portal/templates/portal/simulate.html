@@ -1,0 +1,59 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}Simulation &middot; Spectrum Incentive Portal{% endblock %}
+
+{% block content %}
+
+<div class="page-head-row">
+  <div>
+    <p class="sec-eyebrow">Before you commit</p>
+    <h1 class="page-h1">Plan Simulation</h1>
+    <p class="muted mb0">
+      Model two versions of an incentive against what the team already sells.
+      Nothing here is saved &mdash; change a field and the numbers move.
+    </p>
+  </div>
+</div>
+
+<form method="get" class="sim">
+  {% include "portal/_sim_side.html" with side="a" s=a r=result.a %}
+  {% include "portal/_sim_side.html" with side="b" s=b r=result.b %}
+
+  <div class="sim-verdict">
+    <div class="sv-row">
+      <span>Cost difference</span>
+      <b class="{% if result.cost_delta > 0 %}up{% elif result.cost_delta < 0 %}down{% endif %}">
+        {% if result.cost_delta > 0 %}+{% endif %}{{ result.cost_delta|money }}
+      </b>
+      <span class="small muted">B against A</span>
+    </div>
+    <div class="sv-row">
+      <span>Extra units bought</span>
+      <b class="{% if result.units_delta > 0 %}up{% elif result.units_delta < 0 %}down{% endif %}">
+        {% if result.units_delta > 0 %}+{% endif %}{{ result.units_delta }}
+      </b>
+      <span class="small muted">B against A</span>
+    </div>
+    <div class="sv-row">
+      <span>Cheaper option</span>
+      <b>{% if result.cheaper == 'a' %}{{ result.a.scenario.name }}
+         {% elif result.cheaper == 'b' %}{{ result.b.scenario.name }}
+         {% else %}Identical cost{% endif %}</b>
+      <span class="small muted">on total spend alone</span>
+    </div>
+    <button class="btn btn-primary" type="submit">Re-run</button>
+  </div>
+</form>
+
+<section class="card card-pad" style="margin-top:20px">
+  <h3>How these figures are built</h3>
+  <ul class="spec-mini" style="margin-bottom:0">
+    <li><span>Baseline</span><span>Units the team sells now, from current snapshots</span></li>
+    <li><span>Cost</span><span>Reward &times; every qualifying unit, not only the extra ones</span></li>
+    <li><span>Points</span><span>Converted at a cent each, so both plans compare</span></li>
+    <li><span>Unit worth</span><span>Average commission on active offers in the category</span></li>
+  </ul>
+</section>
+
+{% endblock %}

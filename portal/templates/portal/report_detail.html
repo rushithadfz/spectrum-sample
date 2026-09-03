@@ -1,0 +1,42 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}{{ spec.name }} &middot; Reports{% endblock %}
+
+{% block content %}
+
+<div class="page-head-row">
+  <div>
+    <p class="sec-eyebrow"><a href="{% url 'portal:reports' %}">Reports</a></p>
+    <h1 class="page-h1">{{ spec.name }}</h1>
+    <p class="muted mb0">{{ spec.blurb }}</p>
+  </div>
+  <a class="btn btn-ghost" href="{% url 'portal:report_csv' slug %}">CSV</a>
+  <a class="btn btn-primary" href="{% url 'portal:report_pdf' slug %}">Download PDF</a>
+</div>
+
+<div class="card" data-reveal>
+  <div class="card-head">
+    <h2>{{ total_rows }} row{{ total_rows|pluralize }}</h2>
+    <span class="small muted">Generated {{ generated|date:"M j, H:i" }}</span>
+  </div>
+  <div class="table-wrap">
+    <table class="tbl" data-sortable>
+      <thead><tr>{% for c in cols %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        {% for row in rows %}
+          <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+        {% empty %}
+          <tr><td colspan="{{ cols|length }}" class="empty">Nothing to report yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if truncated %}
+    <div class="card-pad small muted">
+      Showing the first 200 rows. The CSV contains all {{ total_rows }}.
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

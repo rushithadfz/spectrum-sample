@@ -1,0 +1,72 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}Incentives &middot; Spectrum Incentive Portal{% endblock %}
+
+{% block content %}
+
+<div class="page-title">
+  <h1>Incentives</h1>
+  <p class="muted mb0">Every programme you are enrolled in this period.</p>
+</div>
+
+<div class="section-title tone-blue">
+  <div><h2>Active</h2><p class="small muted mb0">Running right now</p></div>
+</div>
+<div class="grid grid-3">
+  {% for i in active %}{% include "portal/_program_card.html" with program=i %}
+  {% empty %}<div class="card empty" style="grid-column:1/-1">Nothing active.</div>{% endfor %}
+</div>
+
+<div class="section-title tone-violet">
+  <div><h2>Just Launched</h2><p class="small muted mb0">New programmes</p></div>
+</div>
+<div class="grid grid-3">
+  {% for i in launched %}{% include "portal/_program_card.html" with program=i %}
+  {% empty %}<div class="card empty" style="grid-column:1/-1">No new programs this period</div>{% endfor %}
+</div>
+
+<div class="section-title tone-amber">
+  <div><h2>Ending Soon</h2><p class="small muted mb0">Act fast</p></div>
+</div>
+<div class="grid grid-3">
+  {% for i in ending %}{% include "portal/_program_card.html" with program=i %}
+  {% empty %}<div class="card empty" style="grid-column:1/-1">Nothing ending soon.</div>{% endfor %}
+</div>
+
+<div class="section-title tone-grey">
+  <div><h2>Previous Incentives</h2><p class="small muted mb0">Completed programmes from past periods</p></div>
+  <form method="get" class="inline-form">
+    <select name="month" onchange="this.form.submit()" aria-label="Filter by month">
+      {% for m in months %}<option {% if m == month %}selected{% endif %}>{{ m }}</option>{% endfor %}
+    </select>
+    <noscript><button class="btn btn-dark btn-sm" type="submit">Filter</button></noscript>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="tbl" data-sortable>
+      <thead>
+        <tr><th>Status</th><th>Code</th><th>Programme</th><th>Result</th>
+            <th class="num">Progress</th><th class="num">Points earned</th></tr>
+      </thead>
+      <tbody>
+        {% for i in previous %}
+          <tr>
+            <td><span class="badge grey">Inactive</span></td>
+            <td class="nowrap">{{ i.short_code }}</td>
+            <td>{{ i.name }}</td>
+            <td><span class="badge green">Completed</span></td>
+            <td class="num" data-sort="{{ i.pct }}">{{ i.pct }}%</td>
+            <td class="num money">{{ i.points_earned }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="empty">No completed programmes for {{ month }}.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

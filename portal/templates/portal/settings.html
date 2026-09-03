@@ -1,0 +1,80 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}Settings &middot; Spectrum Incentive Portal{% endblock %}
+
+{% block content %}
+
+<div class="page-head-row">
+  <div>
+    <p class="sec-eyebrow">{{ region }}</p>
+    <h1 class="page-h1">Settings</h1>
+    <p class="muted mb0">Thresholds and reminders for this region. Other pages read them.</p>
+  </div>
+  {% if record.updated_by %}
+    <div class="ranking-pill">
+      <span class="rk-label">Last saved by</span>
+      <b>{{ record.updated_by.full_name }}</b>
+    </div>
+  {% endif %}
+</div>
+
+{% if messages %}{% for m in messages %}<div class="alert ok">{{ m }}</div>{% endfor %}{% endif %}
+
+<div class="split" style="margin-top:18px">
+  <div class="stack">
+    <section class="card" data-reveal>
+      <div class="card-head"><h2>Thresholds &amp; notifications</h2></div>
+      <form method="post" class="card-pad">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert err">{{ form.non_field_errors }}</div>{% endif %}
+
+        {% for field in form %}
+          <div class="field {% if field.field.widget.input_type == 'checkbox' %}field-check{% endif %}">
+            {% if field.field.widget.input_type == 'checkbox' %}
+              <label for="{{ field.id_for_label }}">{{ field }} <span>{{ field.label }}</span></label>
+            {% else %}
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+            {% endif %}
+            {% if field.errors %}<div class="field-err">{{ field.errors|first }}</div>{% endif %}
+          </div>
+        {% endfor %}
+
+        <button class="btn btn-primary" type="submit">Save settings</button>
+      </form>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="card" data-reveal>
+      <div class="card-head"><h2>What this catches today</h2></div>
+      <div class="card-pad">
+        <p class="small muted" style="margin-top:0">
+          At {{ record.coaching_threshold }}%, <b>{{ below|length }}</b> of
+          {{ headcount }} agent(s) would be flagged for coaching.
+        </p>
+        {% if below %}
+          <ul class="spec-mini" style="margin-bottom:0">
+            {% for a in below %}
+              <li><span>{{ a.full_name }}</span><span>{{ a.attainment }}%</span></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="small muted mb0">Nobody is below the line right now.</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="card card-pad">
+      <h3>Scope</h3>
+      <ul class="spec-mini" style="margin-bottom:0">
+        <li><span>Applies to</span><span>{{ region }}</span></li>
+        <li><span>Other regions</span><span>Set separately</span></li>
+        <li><span>Read by</span><span>Teams, Spend, Close</span></li>
+      </ul>
+    </section>
+  </div>
+</div>
+
+{% endblock %}

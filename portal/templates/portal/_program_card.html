@@ -1,0 +1,34 @@
+{% load portal_extras %}
+{% comment %}One incentive programme card, used on Home and the feed.{% endcomment %}
+<article class="card program" data-cat="{{ program.bucket }}"
+         data-search="{{ program.search_blob }}" data-name="{{ program.name }}"
+         data-days="{{ program.days_left }}"
+         {% if program.pct >= 100 %}data-complete="1"{% endif %}{% if program.is_hidden %} hidden{% endif %}>
+  <span class="program-accent" aria-hidden="true"></span>
+  <div class="program-top">
+    <div class="program-eyebrow">
+      <span class="badge {{ program.status_class }}">{{ program.get_status_display }}</span>
+      <span class="code">{{ program.short_code }}</span>
+    </div>
+    <h3><a href="{% url 'portal:incentive_detail_code' program.short_code %}">{{ program.name }}</a></h3>
+    <p class="blurb">{{ program.description }}</p>
+  </div>
+
+  <div class="program-progress">
+    <div class="bar-row">
+      <span class="lbl">Progress</span>
+      <span class="val">{{ program.progress }}<i>/{{ program.goal }} {{ program.unit }}</i></span>
+    </div>
+    <div class="bar {% if program.pct >= 100 %}green{% endif %}"><span style="width:{{ program.pct }}%"></span></div>
+  </div>
+
+  <div class="program-foot">
+    <span class="days {% if program.days_left == 0 %}urgent{% elif program.days_left <= 7 %}soon{% endif %}">
+      {% if program.days_left %}{{ program.days_left }}d left{% else %}Ends today{% endif %}
+    </span>
+    <span class="reward">
+      {% if program.is_points_based %}{{ program.points_earned }} pts
+      {% else %}{{ program.earned|money0 }} earned{% endif %}
+    </span>
+  </div>
+</article>

@@ -1,0 +1,161 @@
+/* ============================================================
+   SURFACES
+
+   An audit found one treatment applied to every box on every page:
+   the same 10px radius, the same 1px border, the same shadow,
+   eight to ten times over. Uniform rounded rectangles are exactly
+   what makes a layout look machine-made.
+
+   A box should earn its border. Four treatments, chosen by what
+   the thing actually is:
+
+     1. ACTIONABLE   contains a form or a decision. Bordered, so it
+                     reads as something you operate.
+     2. DATA         contains a table. No chrome at all - a heading,
+                     a rule, and the rows. The data is the object.
+     3. SUPPORTING   prose or a short list. A top rule only.
+     4. PRIMARY      the one figure the page is about. Filled.
+
+   Everything is driven by :has(), so it follows the content rather
+   than needing a new class on every template.
+   ============================================================ */
+
+/* ---------- Reset the blanket treatment ---------- */
+[data-theme="press"] .card {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  margin-bottom: 26px;
+}
+[data-theme="press"] .card:hover { transform: none; box-shadow: none; }
+
+/* The card head stops being a filled bar and becomes a heading. */
+[data-theme="press"] .card > .card-head {
+  background: transparent;
+  border-bottom: 2px solid #001b33;
+  padding: 0 0 9px;
+  margin-bottom: 0;
+  align-items: baseline;
+}
+[data-theme="press"] .card > .card-head h2,
+[data-theme="press"] .card > .card-head h3 { color: #001b33; }
+[data-theme="press"] .card > .card-head .small,
+[data-theme="press"] .card > .card-head .muted,
+[data-theme="press"] .card > .card-head .tally { color: #5b6b7b !important; }
+[data-theme="press"] .card > .card-head .enter,
+[data-theme="press"] .card > .card-head a { color: #0073d1 !important; }
+[data-theme="press"] .card > .card-pad { padding: 16px 0 0; }
+
+/* ---------- 2. DATA: a table needs no box ---------- */
+[data-theme="press"] .card:has(> .table-wrap) > .table-wrap { margin-top: 0; }
+[data-theme="press"] table.tbl { margin-top: 0; }
+[data-theme="press"] table.tbl th {
+  background: transparent;
+  color: #5b6b7b;
+  border-bottom: 1px solid #001b33;
+  padding: 9px 12px;
+}
+[data-theme="press"] table.tbl td { padding: 12px 12px; border-bottom: 1px solid #eef2f6; }
+[data-theme="press"] table.tbl tbody tr:nth-child(even) { background: transparent; }
+[data-theme="press"] table.tbl tbody tr:hover { background: #f4f8fc; }
+
+/* ---------- 1. ACTIONABLE: a form or a decision is an object ---------- */
+[data-theme="press"] .card:has(form),
+[data-theme="press"] .card.tier-card,
+[data-theme="press"] .plan-card,
+[data-theme="press"] .report-card {
+  background: #fff;
+  border: 1px solid #d9e2ea;
+  border-radius: 10px;
+  padding: 0;
+}
+[data-theme="press"] .card:has(form) > .card-head,
+[data-theme="press"] .card.tier-card > .card-head {
+  border-bottom: 1px solid #eef2f6;
+  padding: 14px 18px;
+}
+[data-theme="press"] .card:has(form) > .card-pad,
+[data-theme="press"] .card.tier-card > .card-pad,
+[data-theme="press"] .report-card > .card-pad { padding: 18px; }
+/* A table inside an actionable panel keeps the panel's padding. */
+[data-theme="press"] .card:has(form) > .table-wrap table.tbl th { padding-left: 18px; }
+[data-theme="press"] .card:has(form) > .table-wrap table.tbl td { padding-left: 18px; }
+
+/* ---------- 4. PRIMARY: the page's own figure ---------- */
+[data-theme="press"] .stat-panel {
+  background: #001b33;
+  border: 0;
+  border-radius: 12px;
+  padding: 28px 30px;
+}
+[data-theme="press"] .stat-panel,
+[data-theme="press"] .stat-panel *:not(.delta-pill):not(.pt-tip) { color: #dbe7f2; }
+[data-theme="press"] .stat-panel h3 { color: #7fc4f2; }
+[data-theme="press"] .stat-hero .amount { color: #fff; }
+[data-theme="press"] .stat-hero .cur { color: #7fc4f2; }
+[data-theme="press"] .stat-panel .stat-mini {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.14);
+}
+[data-theme="press"] .stat-panel .stat-mini .value,
+[data-theme="press"] .stat-panel .stat-line b,
+[data-theme="press"] .stat-panel .stat-progress b { color: #fff; }
+[data-theme="press"] .stat-panel .stat-mini .label,
+[data-theme="press"] .stat-panel .stat-ytd,
+[data-theme="press"] .stat-panel .sub,
+[data-theme="press"] .stat-panel .cap,
+[data-theme="press"] .stat-panel .area-axis,
+[data-theme="press"] .stat-panel .trend-legend { color: #9fb3c6; }
+[data-theme="press"] .stat-panel .trend-legend b { color: #fff; }
+[data-theme="press"] .stat-panel .stat-track { background: rgba(255,255,255,.14); }
+[data-theme="press"] .stat-panel .stat-line { border-top-color: rgba(255,255,255,.12); }
+/* The chart inverts with the panel. */
+[data-theme="press"] .stat-panel .area-chart .area-line { stroke: #7fc4f2; }
+[data-theme="press"] .stat-panel .area-chart .fill-top { stop-color: #7fc4f2; stop-opacity: .22; }
+[data-theme="press"] .stat-panel .pt-dot { color: #7fc4f2; background: #001b33; }
+[data-theme="press"] .stat-panel .area-pt.now .pt-dot,
+[data-theme="press"] .stat-panel .area-pt.active .pt-dot { background: #7fc4f2; }
+[data-theme="press"] .stat-panel .pt-tip { background: #fff; color: #001b33; }
+[data-theme="press"] .stat-panel .dot-key { background: #7fc4f2; }
+
+/* ---------- KPI row: figures on rules, not five more boxes ---------- */
+[data-theme="press"] .kpi-row {
+  gap: 0;
+  border-top: 2px solid #001b33;
+  border-bottom: 1px solid #d9e2ea;
+  margin-bottom: 26px;
+}
+[data-theme="press"] .kpi {
+  background: transparent;
+  border: 0;
+  border-left: 1px solid #e6ecf2;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 16px 18px;
+}
+[data-theme="press"] .kpi:first-child { border-left: 0; padding-left: 0; }
+[data-theme="press"] .kpi:hover { background: #f7fafc; transform: none; box-shadow: none; }
+/* Only a tile reporting a problem is tinted. */
+[data-theme="press"] .kpi.amber { background: #fdf7ec; }
+[data-theme="press"] .kpi.red { background: #fdf0f2; }
+
+/* ---------- 3. SUPPORTING: a short list needs a rule, not a frame ---------- */
+[data-theme="press"] .card.card-pad:not(:has(form)):not(.tier-card):not(.report-card) {
+  border-top: 1px solid #d9e2ea;
+  padding: 18px 0 0;
+}
+
+/* Programme cards keep an outline - they are individually actionable. */
+[data-theme="press"] .program {
+  background: #fff; border: 1px solid #d9e2ea; border-radius: 10px;
+}
+[data-theme="press"] .program:hover { border-color: #0073d1; }
+[data-theme="press"] .product { background: #fff; border: 1px solid #d9e2ea; border-radius: 10px; }
+
+@media (max-width: 760px) {
+  [data-theme="press"] .kpi { border-left: 0; border-top: 1px solid #e6ecf2; padding-left: 0; }
+  [data-theme="press"] .kpi:first-child { border-top: 0; }
+  [data-theme="press"] .stat-panel { padding: 20px; }
+}

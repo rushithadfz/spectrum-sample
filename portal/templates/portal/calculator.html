@@ -1,0 +1,127 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}Earnings Calculator &middot; Spectrum Incentive Portal{% endblock %}
+
+{% block content %}
+
+<div class="page-title">
+  <h1>Earnings Calculator</h1>
+  <p class="muted mb0">Set a target and get the daily pace that reaches it.</p>
+</div>
+
+{% if saved %}<div class="alert info">Plan saved.</div>{% endif %}
+
+<div class="split">
+  <div class="stack">
+
+    <!-- ---------- Pick a programme + target ---------- -->
+    <div class="card">
+      <div class="card-head"><h2>What&rsquo;s your earning target?</h2></div>
+      <form method="get" class="card-pad calc-form">
+        <div class="field">
+          <label for="incentive">Incentive</label>
+          <select name="incentive" id="incentive">
+            {% for i in incentives %}
+              <option value="{{ i.short_code }}" {% if incentive and i.pk == incentive.pk %}selected{% endif %}>
+                {{ i.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="target">Target {% if incentive.is_points_based %}(points){% else %}(dollars){% endif %}</label>
+          <div class="preset-row">
+            {% for p in presets %}
+              <button class="chip" type="submit" name="target" value="{{ p }}">
+                {% if incentive.is_points_based %}{{ p }} pts{% else %}${{ p }}{% endif %}
+              </button>
+            {% endfor %}
+          </div>
+          <input type="number" name="target" id="target" min="1" step="1"
+                 value="{{ target|default:'' }}" placeholder="Or type your own">
+        </div>
+
+        <button class="btn btn-primary" type="submit">Go</button>
+      </form>
+    </div>
+
+    <!-- ---------- The plan ---------- -->
+    {% if plan %}
+    <div class="card">
+      <div class="card-head">
+        <h2>Here&rsquo;s your {{ incentive.name }} plan!</h2>
+        <span class="badge green">Active</span>
+      </div>
+      <div class="card-pad">
+        <div class="plan-row">
+          <div class="plan-cell">
+            <div class="plan-label">Already {% if incentive.is_points_based %}earned{% else %}sold{% endif %}</div>
+            <div class="plan-value">{{ plan.already|floatformat:0 }}</div>
+            <div class="small muted">
+              {% if not incentive.is_points_based %}{{ incentive.earned|money0 }} earned{% else %}pts{% endif %}
+            </div>
+          </div>
+          <div class="plan-cell">
+            <div class="plan-label">{{ plan.unit_word|title }} needed</div>
+            <div class="plan-value accent">{{ plan.needed }}</div>
+            <div class="small muted">more {{ plan.unit_word }}</div>
+          </div>
+          <div class="plan-cell">
+            <div class="plan-label">Daily target</div>
+            <div class="plan-value accent">{{ plan.daily }}</div>
+            <div class="small muted">{{ plan.unit_word }}/day</div>
+          </div>
+        </div>
+
+        {% if plan.achieved %}
+          <div class="alert ok">Target already achieved! You have earned
+            {% if incentive.is_points_based %}{{ incentive.points_earned }} pts{% else %}{{ incentive.earned|money }}{% endif %} so far.</div>
+        {% else %}
+          <p class="small muted">
+            Rate: {{ incentive.unit_rate_label }} &middot; {{ plan.days }} days remaining
+          </p>
+        {% endif %}
+
+        <form method="post">
+          {% csrf_token %}
+          <button class="btn btn-dark" type="submit">Save My Plan</button>
+        </form>
+      </div>
+    </div>
+    {% else %}
+      <div class="card empty">Pick an incentive and a target to see your plan.</div>
+    {% endif %}
+
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <div class="card-head"><h3>Saved Plans</h3></div>
+      {% if saved_plans %}
+        <ul class="linklist">
+          {% for p in saved_plans %}
+            <li><a href="?incentive={{ p.incentive.short_code }}&amp;target={{ p.target_amount|floatformat:0 }}">
+              <span class="ic">&#128203;</span>{{ p.incentive.name }}
+              <span class="meta">{{ p.units_needed }} to go &middot; {{ p.daily_target }}/day</span>
+            </a></li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="card-pad muted small">No saved plans yet.</div>
+      {% endif %}
+    </div>
+
+    <div class="card card-pad">
+      <h3>How the maths works</h3>
+      <ul class="spec-mini" style="margin-bottom:0">
+        <li><span>Units needed</span><span>(target &minus; earned) &divide; rate</span></li>
+        <li><span>Daily target</span><span>units &divide; days left</span></li>
+        <li><span>Days left</span><span>{{ incentive.days_left }}</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

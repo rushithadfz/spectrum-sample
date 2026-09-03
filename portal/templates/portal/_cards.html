@@ -1,0 +1,25 @@
+{% comment %}
+The product card. Include with:
+
+  {% include "portal/_cards.html" with product=p %}
+
+data-cat / data-search feed the client-side filter in filters.js; the `hidden`
+attribute is what the server decided, so no-JS filtering still works.
+{% endcomment %}
+<article class="card product" data-cat="{{ product.category }}"
+         data-search="{{ product.search_blob }}"{% if product.is_hidden %} hidden{% endif %}>
+  <div class="thumb">{{ product.icon }}</div>
+  <div class="body">
+    <h3>{{ product.name }}</h3>
+    <div class="sku">SKU {{ product.sku }} &middot; {{ product.category }}</div>
+    <p class="desc">{{ product.description }}</p>
+    <ul class="spec-mini">
+      {% for h in product.highlights.all %}
+        <li><span>{{ h.label }}</span><span>{{ h.value }}</span></li>
+      {% endfor %}
+    </ul>
+    <div class="actions">
+      <a class="btn btn-primary btn-sm" href="{{ product.get_absolute_url }}">Specs &amp; links</a>
+    </div>
+  </div>
+</article>

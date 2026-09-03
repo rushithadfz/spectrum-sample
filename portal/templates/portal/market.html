@@ -1,0 +1,138 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}Market &middot; Spectrum Incentive Portal{% endblock %}
+
+{% block content %}
+
+<div class="page-head-row">
+  <div>
+    <p class="sec-eyebrow">{{ agent.market }}</p>
+    <h1 class="page-h1">Market overview</h1>
+    <p class="muted mb0">Every team you own, rolled up</p>
+  </div>
+  <div class="ranking-pill">
+    <span class="rk-label">Manager</span>
+    <b>{{ agent.full_name }}</b>
+  </div>
+</div>
+
+<div class="kpi-row" data-reveal>
+  {% include "portal/_kpi.html" with label="Teams" value=team_count icon="&#128101;" tone="teal" sub="under you" %}
+  {% include "portal/_kpi.html" with label="Field agents" value=headcount icon="&#128100;" tone="blue" sub="across all teams" %}
+  {% include "portal/_kpi.html" with label="Avg attainment" value=avg_attainment suffix="%" icon="&#127919;" tone="green" insight="Mean across every team in the region" %}
+  {% include "portal/_kpi.html" with label="Total points" value=total_points icon="&#9889;" tone="violet" sub="earned this period" %}
+  {% include "portal/_kpi.html" with label="Open disputes" value=open_disputes icon="&#9878;" tone="red" sub="market-wide" %}
+</div>
+
+<div class="sec-head">
+  <div class="sec-eyebrow">Performance</div>
+  <h2>Teams</h2>
+  <p class="small muted mb0">Open a team to see its roster</p>
+</div>
+
+<div class="grid grid-2" data-reveal>
+  {% for t in teams %}
+    <article class="entity">
+      <div class="entity-top">
+        <span class="entity-ic">&#128101;</span>
+        <span>
+          <span class="entity-name">{{ t.name }}</span>
+          <span class="entity-sub">Lead: {{ t.lead.full_name|default:"unassigned" }} &middot; {{ t.region }}</span>
+        </span>
+        <a class="entity-go" href="{% url 'portal:team' %}?team_id={{ t.pk }}"
+           aria-label="Open {{ t.name }}">&rsaquo;</a>
+      </div>
+
+      <div class="entity-figure">{{ t.attainment }}%</div>
+      <div class="entity-figure-label">attainment against quota</div>
+
+      <div class="entity-foot">
+        <div class="bar {{ t.bar_class }}"><span style="width:{{ t.attainment }}%"></span></div>
+      </div>
+
+      <div class="entity-metrics">
+        <div>Headcount<b>{{ t.headcount }}</b></div>
+        <div>Team points<b>{{ t.total_points }}</b></div>
+        <div>Open disputes<b>{{ t.open_disputes }}</b></div>
+      </div>
+    </article>
+  {% empty %}
+    <div class="card empty" style="grid-column:1/-1">No teams assigned to you.</div>
+  {% endfor %}
+</div>
+
+<div class="sec-head">
+  <div class="sec-eyebrow">People</div>
+  <h2>Leaderboard</h2>
+  <p class="small muted mb0">Top performers across every team</p>
+</div>
+
+<div class="card" data-reveal>
+  <div class="table-wrap">
+    <table class="tbl" data-sortable>
+      <thead>
+        <tr><th class="num">#</th><th>Agent</th><th>Team</th>
+            <th class="num">Attainment</th><th class="num">Points</th><th>Tier</th></tr>
+      </thead>
+      <tbody>
+        {% for r in leaderboard %}
+          <tr>
+            <td class="num"><b>{{ forloop.counter }}</b></td>
+            <td>
+              <div class="person">
+                <span class="avatar sm">{{ r.agent.initials }}</span>
+                <b>{{ r.agent.full_name }}</b>
+              </div>
+            </td>
+            <td class="nowrap">{{ r.agent.team.name }}</td>
+            <td class="num" data-sort="{{ r.attainment }}">
+              <div class="mini-bar-wrap">
+                <span class="mini-num">{{ r.attainment }}%</span>
+                <span class="bar {{ r.attainment_class }}"><span style="width:{{ r.attainment }}%"></span></span>
+              </div>
+            </td>
+            <td class="num">{{ r.points }}</td>
+            <td><span class="badge">{{ r.tier }}</span></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="empty">No agents yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if at_risk %}
+<div class="sec-head">
+  <div class="sec-eyebrow">Coaching</div>
+  <h2>Below 70% attainment</h2>
+  <p class="small muted mb0">Needs a conversation before the period closes</p>
+</div>
+<div class="card" data-reveal>
+  <div class="table-wrap">
+    <table class="tbl" data-sortable>
+      <thead><tr><th>Agent</th><th>Team</th><th class="num">Attainment</th><th class="num">Points</th></tr></thead>
+      <tbody>
+        {% for r in at_risk %}
+          <tr>
+            <td>
+              <div class="person">
+                <span class="avatar sm">{{ r.agent.initials }}</span>
+                <b>{{ r.agent.full_name }}</b>
+              </div>
+            </td>
+            <td class="nowrap">{{ r.agent.team.name }}</td>
+            <td class="num" data-sort="{{ r.attainment }}">
+              <span class="diff-pill down">{{ r.attainment }}%</span>
+            </td>
+            <td class="num">{{ r.points }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

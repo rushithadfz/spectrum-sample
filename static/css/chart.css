@@ -1,0 +1,83 @@
+/* ============================================================
+   CHART LAYOUT - theme-agnostic.
+
+   The area chart's geometry was written inside a single theme's
+   block, so any other theme rendered it unpositioned: every value
+   label stacked at x=0 and the month axis collapsed into
+   "JanFebMarAprMayJun".
+
+   Position, stacking and spacing are structural - they belong to
+   the component, not to a theme. Only colour stays themed.
+   ============================================================ */
+
+.area-wrap {
+  position: relative;          /* the containing block for the points */
+  margin: 8px 0 0;
+}
+.area-chart { display: block; width: 100%; height: 180px; }
+
+/* The dots live outside the stretched SVG so they stay round, which
+   means they need explicit positioning against the wrapper. */
+.area-points { position: absolute; inset: 0; pointer-events: none; }
+.area-pt { position: absolute; transform: translate(-50%, -50%); }
+
+.pt-dot {
+  display: block; width: 9px; height: 9px; border-radius: 50%;
+  background: #fff; border: 2.5px solid currentColor;
+  transition: width .18s ease, height .18s ease;
+}
+
+/* Only the current month, or the one under the pointer, shows a value.
+   Without this every label paints at once. */
+.pt-tip {
+  position: absolute; bottom: 16px; left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 11px; font-weight: 600;
+  padding: 3px 8px; border-radius: 6px;
+  opacity: 0; transition: opacity .15s ease;
+  pointer-events: none;
+}
+.area-pt.now .pt-tip,
+.area-pt.active .pt-tip { opacity: 1; }
+.area-wrap:hover .pt-tip { opacity: 0; }
+.area-wrap:hover .area-pt.active .pt-tip { opacity: 1; }
+
+.area-pt.now .pt-dot,
+.area-pt.active .pt-dot { width: 13px; height: 13px; }
+.area-wrap:hover .area-pt.now:not(.active) .pt-dot { width: 9px; height: 9px; }
+
+/* The month axis is a row, not a run-on sentence. */
+.area-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+.area-axis span { flex: 0 0 auto; }
+
+.trend-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 14px; flex-wrap: wrap; margin-bottom: 4px;
+}
+.trend-legend { font-size: 12px; display: flex; align-items: center; gap: 7px; }
+.dot-key { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+@media (max-width: 900px) { .area-chart { height: 150px; } }
+@media (max-width: 560px) {
+  .area-chart { height: 120px; }
+  .area-axis { font-size: 10px; }
+  .pt-tip { font-size: 10px; padding: 2px 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pt-dot, .pt-tip { transition: none; }
+}
+
+
+/* A centred tooltip on the first or last point hangs off the chart, so
+   those two anchor to their inside edge instead. */
+.area-pt:first-child .pt-tip { left: 8px; transform: none; }
+/* The point's box is centred on the chart edge, so anchoring the tip to
+   that box still hangs it out by the dot's radius. Offset past it. */
+.area-pt:last-child  .pt-tip { left: auto; right: 8px; transform: none; }

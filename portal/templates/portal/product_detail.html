@@ -1,0 +1,75 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}{{ product.name }} specs &middot; Agent Portal{% endblock %}
+
+{% block content %}
+
+<div class="page-head-row">
+  <div>
+    <div class="crumb"><a href="{% url 'portal:products' %}">Products</a> / {{ product.name }}</div>
+    <h1 class="page-h1">{{ product.icon }} {{ product.name }}</h1>
+    <p class="muted mb0">{{ product.description }}</p>
+  </div>
+</div>
+<div class="split">
+
+  <div class="stack">
+
+    <div class="card">
+      <div class="card-head">
+        <h2>Full specifications</h2>
+        <span class="tag">SKU {{ product.sku }}</span>
+      </div>
+      <table class="spec-table">
+        {% for g in product.spec_groups.all %}
+          <tr><td class="spec-group-title" colspan="2">{{ g.name }}</td></tr>
+          {% for s in g.specs.all %}
+            <tr><th>{{ s.label }}</th><td>{{ s.value }}</td></tr>
+          {% endfor %}
+        {% empty %}
+          <tr><td class="empty" colspan="2">No specifications recorded for this product yet.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+
+  </div>
+
+  <div class="stack">
+
+    <div class="card card-pad">
+      <div class="small muted" style="font-weight:700;text-transform:uppercase;letter-spacing:.07em">At a glance</div>
+      <ul class="spec-mini" style="margin:10px 0 0">
+        {% for h in product.highlights.all %}
+          <li><span>{{ h.label }}</span><span>{{ h.value }}</span></li>
+        {% endfor %}
+        <li><span>Category</span><span>{{ product.category }}</span></li>
+        <li><span>Price</span><span>{{ product.price_note }}</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Product links</h3></div>
+      <ul class="linklist">
+        {% for l in product.links.all %}
+          <li><a href="{{ l.url }}"{% if l.is_external %} target="_blank" rel="noopener"{% endif %}>
+            <span class="ic">{{ l.icon }}</span>{{ l.label }}
+            <span class="meta">{% if l.is_external %}External &#8599;{% else %}Internal{% endif %}</span>
+          </a></li>
+        {% empty %}
+          <li><div class="card-pad muted small">No links recorded.</div></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="card card-pad">
+      <h3>Need something else?</h3>
+      <p class="small muted">Specs come from the product knowledge base and are editable in the admin.</p>
+      <a class="btn btn-ghost btn-block"
+         href="{% url 'admin:portal_product_change' product.pk %}">Edit these specs</a>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

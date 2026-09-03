@@ -1,0 +1,222 @@
+/* ============================================================
+   THE CHARACTER
+
+   Idles quietly, then changes what it is doing to match the page:
+   pointing when there is an action, waiting when somebody else has
+   the ball, alert when something went wrong, easy when nothing is
+   outstanding.
+
+   Every motion is small and slow. A figure that bounces next to a
+   payout figure undermines it.
+   ============================================================ */
+
+.ch { display: inline-block; line-height: 0; flex: none; }
+.ch svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+.ch-sm { width: 34px; height: 38px; }
+.ch-md { width: 52px; height: 58px; }
+.ch-lg { width: 76px; height: 86px; }
+
+/* ---------- Palette ----------
+   Spectrum blues, plus one neutral for skin. Kept as a variable so it is a
+   one-line change, not a hunt through the file. */
+.ch { --ch-skin: #f4ded2; --ch-skin-line: #e0c3b3; }
+
+.ch-shadow  { fill: rgba(0,27,51,.13); }
+.ch-skin    { fill: var(--ch-skin); }
+.ch-neck    { fill: var(--ch-skin-line); }
+.ch-shirt   { fill: #0073d1; }
+.ch-collar  { fill: #fff; }
+.ch-sleeve  { fill: #005cab; }
+.ch-pin     { fill: #fff; }
+.ch-eye     { fill: #001b33; }
+.ch-brow    { stroke: #001b33; stroke-width: 1.4; stroke-linecap: round; fill: none; }
+.ch-smile   { stroke: #001b33; stroke-width: 1.4; stroke-linecap: round; fill: none; }
+.ch-spark   { fill: #0073d1; }
+
+/* The badge dot is the mood indicator. */
+.ch[data-mood="amber"] .ch-spark { fill: #b26b00; }
+.ch[data-mood="red"]   .ch-spark { fill: #c8102e; }
+.ch[data-mood="green"] .ch-spark { fill: #128a4b; }
+
+/* ---------- Idle: breathing, and an occasional blink ---------- */
+.ch-body { transform-origin: 32px 66px; animation: chBreathe 4.2s ease-in-out infinite; }
+@keyframes chBreathe {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50%      { transform: translateY(-1.2px) scaleY(1.012); }
+}
+
+/* Blinking is a scaleY on the eyes, held closed only for a moment. */
+.ch-eye { transform-origin: center; animation: chBlink 6.4s infinite; }
+.ch-eye-r { animation-delay: .06s; }
+@keyframes chBlink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  94%, 97%      { transform: scaleY(.12); }
+}
+
+/* The head drifts a little, so the figure never looks frozen. */
+.ch-head { transform-origin: 32px 38px; animation: chLook 9s ease-in-out infinite; }
+@keyframes chLook {
+  0%, 100% { transform: rotate(0deg); }
+  30%      { transform: rotate(-3.5deg); }
+  62%      { transform: rotate(3deg); }
+}
+
+/* The spark pulses at the same rate as breathing. */
+.ch-spark { animation: chSpark 4.2s ease-in-out infinite; transform-origin: 32px 2.5px; }
+@keyframes chSpark {
+  0%, 100% { opacity: .55; transform: scale(.85); }
+  50%      { opacity: 1;   transform: scale(1.15); }
+}
+
+/* ---------- Moods ---------- */
+
+/* BLUE - there is something to do, so it points at it. */
+.ch[data-mood="blue"] .ch-arm {
+  transform-origin: 47px 50px;
+  animation: chPoint 3.4s ease-in-out infinite;
+}
+@keyframes chPoint {
+  0%, 55%, 100% { transform: rotate(0deg); }
+  20%, 40%      { transform: rotate(-62deg); }
+}
+
+/* AMBER - waiting on somebody else: a slow, patient tap. */
+.ch[data-mood="amber"] .ch-arm {
+  transform-origin: 47px 50px;
+  animation: chTap 1.9s ease-in-out infinite;
+}
+@keyframes chTap {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-13deg); }
+}
+.ch[data-mood="amber"] .ch-head { animation-duration: 6s; }
+
+/* RED - attention needed. The figure leans in and the spark insists. */
+.ch[data-mood="red"] .ch-body { animation: chAlert 2.6s ease-in-out infinite; }
+@keyframes chAlert {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25%      { transform: translateY(-1px) rotate(-2.5deg); }
+  60%      { transform: translateY(-1px) rotate(2.5deg); }
+}
+.ch[data-mood="red"] .ch-spark { animation-duration: 1.2s; }
+.ch[data-mood="red"] .ch-eye { fill: #ffd9de; }
+
+/* GREEN - nothing outstanding, so both arms go up, once in a while. */
+.ch[data-mood="green"] .ch-arm {
+  transform-origin: 47px 50px; animation: chCheerR 5s ease-in-out infinite;
+}
+.ch[data-mood="green"] .ch-arm-left {
+  transform-origin: 17px 50px; animation: chCheerL 5s ease-in-out infinite;
+}
+@keyframes chCheerR {
+  0%, 62%, 100% { transform: rotate(0deg); }
+  72%, 88%      { transform: rotate(-140deg); }
+}
+@keyframes chCheerL {
+  0%, 62%, 100% { transform: rotate(0deg); }
+  72%, 88%      { transform: rotate(140deg); }
+}
+
+/* ---------- Reacting to a click ---------- */
+.ch.is-nudged .ch-body { animation: chNudge .5s cubic-bezier(.3,1.4,.4,1); }
+@keyframes chNudge {
+  0%   { transform: translateY(0) scale(1); }
+  35%  { transform: translateY(-5px) scale(1.05); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* ---------- Placements ---------- */
+.ask-fab .ch { margin-right: 2px; }
+.ask-head .ch { margin-right: 10px; }
+.next-action .ch { margin-right: 2px; }
+
+/* A figure that never stops moving is a figure you stop reading past. */
+@media (prefers-reduced-motion: reduce) {
+  .ch-body, .ch-eye, .ch-head, .ch-spark, .ch-arm, .ch-arm-left { animation: none !important; }
+}
+
+
+/* ---------- Appearance ----------
+   Driven by the person's stored preference. Nothing is inferred from a
+   name: guessing gender from "Jenny" or "Sam" gets real people wrong. */
+.ch-hair-long, .ch-hair-short { fill: #001b33; display: none; }
+.ch[data-presents="woman"] .ch-hair-long { display: block; }
+.ch[data-presents="man"] .ch-hair-short { display: block; }
+/* "unspecified" gets the short style rather than a bald figure. */
+.ch:not([data-presents="woman"]) .ch-hair-short { display: block; }
+/* "unspecified" shows neither, and the figure stays as it is. */
+
+
+/* ---------- On dark surfaces ----------
+   The figure was drawn in navy, which disappeared on the blue Ask button
+   and on the dark HUD. On anything dark it inverts: light body, deep visor. */
+.ask-fab .ch-shirt, .ask-fab .ch-sleeve,
+.hud .ch-shirt, .hud .ch-sleeve { fill: #dbe7f2; }
+.ask-fab .ch-collar, .hud .ch-collar { fill: #0073d1; }
+.ask-fab .ch-sleeve, .hud .ch-sleeve { fill: #b9cfe3; }
+.ask-fab .ch-pin, .hud .ch-pin { fill: #001b33; }
+/* Navy hair on a navy panel is a silhouette with no edges. On dark it
+   lifts to a mid tone so the head still has a shape. */
+.ask-fab .ch-hair-long, .ask-fab .ch-hair-short,
+.hud .ch-hair-long, .hud .ch-hair-short { fill: #2b567f; }
+.ask-fab .ch-shadow, .hud .ch-shadow { fill: rgba(0,0,0,.26); }
+
+/* Beside the directive it sits on white, so it keeps the dark palette but
+   needs a touch more presence at 34px. */
+
+
+
+/* ---------- The greeting ----------
+   On sign-in the figure is the first thing on the card: it waves, and
+   says the person's name. Everything else on the card is a number, so
+   this is the only place the character is allowed to be big. */
+.ch-xl { width: 104px; height: 118px; }
+
+.greeter {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; margin-bottom: 12px;
+}
+.greeter-say {
+  margin: 0 !important;
+  font-size: 19px; font-weight: 700; letter-spacing: -.01em;
+  color: #fff !important;
+  position: relative;
+  background: rgba(127,196,242,.14);
+  border: 1px solid rgba(127,196,242,.30);
+  border-radius: 999px;
+  padding: 7px 18px;
+  animation: greetSay .5s .35s ease both;
+}
+/* the tail, pointing back up at whoever said it */
+.greeter-say::before {
+  content: ""; position: absolute; top: -5px; left: 50%; width: 9px; height: 9px;
+  background: rgba(127,196,242,.14);
+  border-left: 1px solid rgba(127,196,242,.30);
+  border-top: 1px solid rgba(127,196,242,.30);
+  transform: translateX(-50%) rotate(45deg);
+}
+@keyframes greetSay {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* The wave itself: three passes, then the arm rests. A mascot that waves
+   forever stops meaning hello. */
+.ch.is-waving[data-mood] .ch-arm {
+  transform-origin: 47px 50px;
+  animation: chWave 1.15s ease-in-out 3 both;
+}
+/* the other arm stays down, or the wave reads as a cheer */
+.ch.is-waving[data-mood] .ch-arm-left { animation: none; transform: none; }
+@keyframes chWave {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-155deg); }
+  50%      { transform: rotate(-125deg); }
+  75%      { transform: rotate(-155deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch.is-waving[data-mood] .ch-arm { animation: none !important; }
+  .greeter-say { animation: none; }
+}

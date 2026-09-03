@@ -1,0 +1,5 @@
+# Development extras. Install alongside requirements.txt.
+-r requirements.txt
+
+# Browser automation, used for the UI audits in tools/.
+playwright>=1.40

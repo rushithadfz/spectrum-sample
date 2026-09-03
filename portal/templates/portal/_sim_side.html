@@ -1,0 +1,69 @@
+{% load portal_extras %}
+{% comment %}
+One side of the comparison: its inputs, then what they produce. Inputs and
+results share a panel on purpose - reading the cost means reading it next to
+the number that caused it.
+{% endcomment %}
+<section class="sim-side tone-{{ r.verdict }}">
+  <header class="ss-head">
+    <input class="ss-name" type="text" name="{{ side }}_name" value="{{ s.name }}"
+           aria-label="Scenario name">
+    <span class="badge {{ r.verdict }}">
+      {% if r.verdict == 'green' %}Sound{% elif r.verdict == 'amber' %}Check it{% else %}Loses money{% endif %}
+    </span>
+  </header>
+
+  <div class="ss-inputs">
+    <label>Team
+      <select name="{{ side }}_team">
+        {% for t in teams %}
+          <option value="{{ t.id }}" {% if s.team.id == t.id %}selected{% endif %}>{{ t.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Category
+      <select name="{{ side }}_category">
+        {% for value, label in categories %}
+          <option value="{{ value }}" {% if s.category == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Reward
+      <select name="{{ side }}_reward">
+        {% for value, label in rewards %}
+          <option value="{{ value }}" {% if s.reward_type == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Amount
+      <input type="number" name="{{ side }}_amount" value="{{ s.reward_amount }}" min="0" step="0.01">
+    </label>
+    <label>Target units
+      <input type="number" name="{{ side }}_units" value="{{ s.target_units }}" min="0" step="1">
+    </label>
+  </div>
+
+  <div class="ss-cost">
+    <span class="ss-cost-label">Total cost</span>
+    <span class="ss-cost-value">{{ r.cost|money }}</span>
+  </div>
+
+  <ul class="ss-out">
+    <li><span>Team sells now</span><b>{{ r.baseline }} units</b></li>
+    <li><span>Target</span><b>{{ r.target }} units</b></li>
+    <li><span>Extra units bought</span>
+      <b class="{% if r.incremental > 0 %}up{% else %}down{% endif %}">{{ r.incremental }}</b></li>
+    <li><span>Reward per unit</span><b>{{ r.reward_per_unit|money }}</b></li>
+    <li><span>Cost per extra unit</span>
+      <b>{% if r.cost_per_incremental %}{{ r.cost_per_incremental|money }}{% else %}&mdash;{% endif %}</b></li>
+    <li><span>A unit is worth</span>
+      <b>{% if r.unit_margin %}{{ r.unit_margin|money }}{% else %}Not known{% endif %}</b></li>
+    {% if r.budget %}
+      <li><span>Share of {{ s.team.region }} budget</span><b>{{ r.budget_share }}%</b></li>
+    {% endif %}
+  </ul>
+
+  {% for note in r.notes %}
+    <p class="ss-note">{{ note }}</p>
+  {% endfor %}
+</section>

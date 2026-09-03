@@ -1,0 +1,91 @@
+{% extends "portal/base.html" %}
+{% block title %}Spidey &middot; Spectrum Incentive Portal{% endblock %}
+{% block content %}
+
+<div class="page-head-row">
+  <div>
+    <h1 class="page-h1">Spidey</h1>
+    <p class="muted mb0">Ask about your numbers &mdash; answers come from this portal's data</p>
+  </div>
+  {% if history %}
+  <form method="post">
+    {% csrf_token %}
+    <button class="btn btn-ghost btn-sm" name="clear" value="1" type="submit">Clear chat</button>
+  </form>
+  {% endif %}
+</div>
+
+<div class="split">
+  <div class="stack">
+    <section class="card chat-card" data-reveal>
+      <div class="chat-log" id="chatLog">
+        {% if not history %}
+          <div class="chat-empty">
+            <div class="chat-ic">&#128172;</div>
+            <p>Ask me about your {% if agent.is_agent %}earnings, rank or quests{% else %}teams, trends or plans{% endif %}.</p>
+          </div>
+        {% endif %}
+        {% for turn in history %}
+          <div class="bubble you">{{ turn.q }}</div>
+          <div class="bubble bot">
+            {{ turn.a }}
+            <span class="engine-tag {{ turn.engine }}">{% if turn.engine == "claude" %}Claude{% else %}portal data{% endif %}</span>
+            {% if turn.links %}
+              <div class="bubble-links">
+                {% for l in turn.links %}<a href="{{ l.url }}">{{ l.label }} &rsaquo;</a>{% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <form method="post" class="chat-form">
+        {% csrf_token %}
+        <input type="text" name="q" id="chatInput" autocomplete="off" maxlength="300"
+               aria-label="Ask Spidey a question"
+               placeholder="Ask a question&hellip;" autofocus>
+        <button class="btn btn-primary" type="submit">Ask</button>
+      </form>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="card">
+      <div class="card-head"><h3>Try asking</h3></div>
+      <ul class="linklist">
+        {% for s in suggestions %}
+          <li>
+            <form method="post" class="suggest-form">
+              {% csrf_token %}
+              <input type="hidden" name="q" value="{{ s }}">
+              <button type="submit"><span class="ic">&#10148;</span>{{ s }}</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="card card-pad">
+      <h3>How this works</h3>
+      {% if llm_on %}
+        <p class="small muted">
+          Answers come from <b>Claude</b>. Before each question the portal gathers
+          the figures your role is allowed to see and passes them in, and the model
+          is instructed to answer only from those &mdash; so nothing is invented.
+        </p>
+        <p class="small muted mb0">
+          If the API is unreachable it falls back to matching your question
+          against the database directly, labelled <b>portal data</b>.
+        </p>
+      {% else %}
+        <p class="small muted mb0">
+          No API key is configured, so answers come straight from the database by
+          matching your question against known intents. Set
+          <code>ANTHROPIC_API_KEY</code> to switch on Claude-written answers.
+        </p>
+      {% endif %}
+    </section>
+  </div>
+</div>
+
+{% endblock %}

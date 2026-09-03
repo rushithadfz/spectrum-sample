@@ -1,0 +1,67 @@
+{% comment %}
+The assistant, as a person.
+
+Drawn as inline SVG rather than a GIF so it scales to any size without
+blurring, inherits the palette, and can be animated part by part - the head
+turns, the eyes blink, one arm waves independently of the other. A fixed
+image can do none of that.
+
+    {% include "portal/_character.html" with mood=next_action.tone size="sm" %}
+
+  blue   pointing at the thing you should do next
+  amber  waiting on somebody else
+  red    something needs attention
+  green  nothing outstanding
+
+Appearance follows the person's own recorded preference. Nothing is inferred
+from a name: guessing gender from "Jenny" or "Sam" gets real people wrong.
+{% endcomment %}
+<span class="ch ch-{{ size|default:'md' }}{% if wave %} is-waving{% endif %}" data-mood="{{ mood|default:'blue' }}"
+      data-presents="{{ agent.presents_as|default:'unspecified' }}" aria-hidden="true">
+  <svg viewBox="0 0 64 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse class="ch-shadow" cx="32" cy="69" rx="15" ry="2.6"/>
+
+    <g class="ch-body">
+      <!-- back of the long hair, behind the shoulders -->
+      <path class="ch-hair-long ch-hair-back" d="M19 26c0-9 5.8-15 13-15s13 6 13 15v20c0 3-2.4 4-4 2V30H23v18c-1.6 2-4 1-4-2z"/>
+
+      <!-- shoulders and shirt -->
+      <path class="ch-shirt" d="M32 42c6.5 0 11.5 2.6 13 7.6L47 66H17l2-16.4C20.5 44.6 25.5 42 32 42z"/>
+      <!-- collar, so the shirt reads as a shirt and not a block -->
+      <path class="ch-collar" d="M27.6 42.6 32 49l4.4-6.4-2.2-1.1L32 44l-2.2-2.5z"/>
+
+      <!-- the arm that waves, points or rests -->
+      <g class="ch-arm">
+        <rect class="ch-sleeve" x="44.8" y="47" width="6" height="11" rx="3.2"/>
+        <rect class="ch-skin" x="45.2" y="55" width="5.2" height="8" rx="2.6"/>
+      </g>
+      <g class="ch-arm-left">
+        <rect class="ch-sleeve" x="13.2" y="47" width="6" height="11" rx="3.2"/>
+        <rect class="ch-skin" x="13.6" y="55" width="5.2" height="8" rx="2.6"/>
+      </g>
+
+      <!-- the pin on the chest carries the mood colour -->
+      <circle class="ch-pin" cx="25.5" cy="54" r="2.5"/>
+      <circle class="ch-spark" cx="25.5" cy="54" r="1.5"/>
+
+      <g class="ch-head">
+        <rect class="ch-skin ch-neck" x="28.6" y="34" width="6.8" height="9" rx="3"/>
+        <!-- ears -->
+        <ellipse class="ch-skin" cx="21.4" cy="25" rx="2" ry="2.6"/>
+        <ellipse class="ch-skin" cx="42.6" cy="25" rx="2" ry="2.6"/>
+        <!-- face -->
+        <path class="ch-skin" d="M32 10c6.4 0 10.8 4.6 10.8 11.4v4.2C42.8 32.6 38 37 32 37s-10.8-4.4-10.8-11.4v-4.2C21.2 14.6 25.6 10 32 10z"/>
+
+        <circle class="ch-eye ch-eye-l" cx="27.6" cy="24" r="1.7"/>
+        <circle class="ch-eye ch-eye-r" cx="36.4" cy="24" r="1.7"/>
+        <path class="ch-brow" d="M25.4 20.4c1.3-.9 2.9-.9 4.2 0"/>
+        <path class="ch-brow" d="M34.4 20.4c1.3-.9 2.9-.9 4.2 0"/>
+        <path class="ch-smile" d="M29 29.6c1.8 1.6 4.2 1.6 6 0"/>
+
+        <!-- hair, front. Only the one matching the stored preference shows. -->
+        <path class="ch-hair-long" d="M21.2 22.4c0-7.6 4.6-12.6 10.8-12.6s10.8 5 10.8 12.6l-2.6-1c-1-4-4-6.2-8.2-6.2-2.6 2.6-6 4.2-8.2 4.6z"/>
+        <path class="ch-hair-short" d="M21.2 22.2c0-7.4 4.6-12.4 10.8-12.4s10.8 5 10.8 12.4l-2.4-.9v-3.4c-3 1-11.4 1.2-16.8-1.2l-.2 4.6z"/>
+      </g>
+    </g>
+  </svg>
+</span>

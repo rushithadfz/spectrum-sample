@@ -1,0 +1,31 @@
+{% comment %}
+A KPI tile in the reference design language: caps label, tinted icon chip,
+big figure, a movement line, and an insight sentence underneath.
+
+    {% include "portal/_kpi.html" with label="Team attainment" value="86%"
+       icon="&#127919;" tone="blue" delta="+7.0%" delta_dir="up"
+       insight="Two agents carrying the squad this period" %}
+{% endcomment %}
+<div class="kpi">
+  <div class="kpi-top">
+    <div class="kpi-label">{{ label }}</div>
+    <span class="kpi-chip {{ tone|default:'blue' }}">{{ icon|default:"&#9679;"|safe }}</span>
+  </div>
+
+  <div class="kpi-value {% if wide %}small-value{% endif %}">
+    {% if prefix %}<span class="cur">{{ prefix }}</span>{% endif %}{{ value }}{{ suffix|default:"" }}
+  </div>
+
+  {% if delta %}
+    <div class="kpi-move {{ delta_dir|default:'up' }}">
+      {% if delta_dir == "down" %}&#8600;{% else %}&#8599;{% endif %} {{ delta }}{{ suffix_delta|default:"" }}
+      <span class="kpi-move-note">{{ delta_note|default:"vs last period" }}</span>
+    </div>
+  {% endif %}
+
+  {% if insight %}
+    <div class="kpi-insight"><span class="spark">&#10022;</span>{{ insight }}</div>
+  {% elif sub %}
+    <div class="kpi-sub">{{ sub }}</div>
+  {% endif %}
+</div>

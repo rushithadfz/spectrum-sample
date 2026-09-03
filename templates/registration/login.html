@@ -1,0 +1,134 @@
+{% load static portal_extras %}<!DOCTYPE html>
+<html lang="en" data-theme="press">
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign In &middot; Spectrum Incentive Portal</title>
+<link rel="stylesheet" href="{% static_v 'css/app.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/login.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/chart.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/themes.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/play.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/arena.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/icons.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/press.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/restraint.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/surfaces.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/character.css' %}">
+</head>
+<body class="login-page">
+
+<canvas id="grid-canvas" aria-hidden="true"></canvas>
+
+<div class="login-wrap">
+
+  <!-- ============ Left: game-styled hero ============ -->
+  <section class="login-art">
+    <span class="brand" style="margin-bottom:30px">
+      <span class="brand-mark">Spectrum</span>
+      <span class="brand-sub">Incentive Portal</span>
+    </span>
+
+    <div class="rank-card">
+      <div class="rank-eyebrow"><span class="dot"></span> Season 3 &middot; Live</div>
+
+      <div class="rank-row">
+        <div class="level-badge">
+          <svg width="76" height="76" viewBox="0 0 76 76" aria-hidden="true">
+            <circle class="ring-bg"   cx="38" cy="38" r="33" fill="none" stroke-width="5"></circle>
+            <circle class="ring-fill" cx="38" cy="38" r="33" fill="none" stroke-width="5"
+                    stroke-dasharray="207.3" stroke-dashoffset="207.3" id="lvlRing"></circle>
+          </svg>
+          <div class="lvl"><b id="lvlNum">0</b><span>TEAMS</span></div>
+        </div>
+        <div>
+          <h2 class="rank-title">Southwest &amp; Northeast</h2>
+          <p class="rank-sub">{{ stat_people }} people across {{ stat_teams }} inbound queues</p>
+        </div>
+      </div>
+
+      <div class="xp-track"><span id="xpFill"></span></div>
+      <div class="xp-legend">
+        <span>Season progress</span>
+        <span id="xpLeft">3 days left in the period</span>
+      </div>
+
+      <div class="chip-row">
+        <span class="gchip">&#128101; <b>{{ stat_people }}</b> in the org</span>
+        <span class="gchip">&#127942; <b>{{ stat_teams }}</b> teams</span>
+        <span class="gchip">&#9889; <b>{{ stat_incentives }}</b> live programmes</span>
+      </div>
+    </div>
+
+    <div class="marks">
+      <div><b class="countup" data-to="{{ stat_people|default:23 }}">0</b> people</div>
+      <div><b class="countup" data-to="{{ stat_incentives|default:9 }}">0</b> incentive programs</div>
+      <div><b class="countup" data-to="{{ stat_products|default:11 }}">0</b> products</div>
+      <div><b class="countup" data-to="{{ stat_specs|default:151 }}">0</b> spec rows</div>
+    </div>
+
+    <div class="objective" id="objective">
+      <div class="obj-label">Today&rsquo;s objective</div>
+      <p class="obj-text">Loading&hellip;</p>
+    </div>
+  </section>
+
+  <!-- ============ Right: role picker, no credentials ============ -->
+  <section class="login-panel">
+    <div class="login-card role-card">
+      <h2>Sign in</h2>
+      <p class="sub">Pick anyone in the org &mdash; each role sees a different portal.</p>
+
+      {% if error %}<div class="alert err" id="authError">{{ error }}</div>{% endif %}
+
+      <form method="post" action="{% url 'login' %}" id="roleForm">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+
+        <div class="persona-scroll">
+        {% for group_name, group in grouped %}
+          {% if group %}
+            <div class="persona-group">{{ group_name }} <span>{{ group|length }}</span></div>
+            <ul class="persona-list">
+              {% for p in group %}
+                <li>
+                  <button type="submit" name="persona" value="{{ p.slug }}"
+                          class="persona" data-persona="{{ p.slug }}" data-name="{{ p.name }}"
+                          {% if p.slug == default_slug %}data-default="1"{% endif %}>
+                    <span class="persona-avatar accent-{{ p.accent }}">{{ p.initials }}</span>
+                    <span class="persona-body">
+                      <span class="persona-name">{{ p.name }}</span>
+                      <span class="persona-title">{{ p.title }}</span>
+                    </span>
+                    <span class="persona-tick" aria-hidden="true">&#10003;</span>
+                  </button>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endfor %}
+        </div>
+
+        <button class="btn btn-primary btn-block unlock" type="submit"
+                id="enterBtn" name="persona" value="{{ default_slug }}">
+          <span class="fill"></span>
+          <span class="label" id="enterLabel">Continue</span>
+        </button>
+      </form>
+
+      <div class="demo-note">
+        <b>Prototype build.</b> Sign-in is not wired to an identity provider yet &mdash;
+        selecting a profile takes you straight in. Each role sees a different portal:
+        agents see their own numbers, leads see their squad, the manager sees every team.
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="{% static_v 'js/login.js' %}"></script>
+</body>
+</html>

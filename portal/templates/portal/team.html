@@ -1,0 +1,109 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}My Team &middot; Spectrum Incentive Portal{% endblock %}
+
+{% block content %}
+
+<div class="greet">
+  <div>
+    <p class="greet-small">{{ team.name|default:"No team assigned" }}</p>
+    <h1 class="greet-name">My Team</h1>
+  </div>
+  <div class="greet-meta">
+    <span><b>Lead:</b> {{ team.lead.full_name|default:"—" }}</span>
+    <span><b>Region:</b> {{ team.region }}</span>
+    {% if teams|length > 1 %}
+      <form method="get" class="inline-form">
+        <select name="team_id" data-autofilter aria-label="Switch team">
+          {% for t in teams %}
+            <option value="{{ t.pk }}" {% if t.pk == team.pk %}selected{% endif %}>{{ t.name }}</option>
+          {% endfor %}
+        </select>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="kpi-row" data-reveal>
+  {% include "portal/_kpi.html" with label="Headcount" value=headcount icon="&#128101;" tone="teal" sub="field agents" %}
+  {% include "portal/_kpi.html" with label="At or above quota" value=on_track icon="&#9989;" tone="green" sub="of the squad" %}
+  {% include "portal/_kpi.html" with label="Team attainment" value=team.attainment suffix="%" icon="&#127919;" tone="blue" insight="Mean across the squad" %}
+  {% include "portal/_kpi.html" with label="Team points" value=team_points icon="&#9889;" tone="violet" sub="this period" %}
+  {% include "portal/_kpi.html" with label="Open disputes" value=open_disputes icon="&#9878;" tone="red" sub="awaiting action" %}
+</div>
+
+<div class="section-title">
+  <div><h2><span class="head-ic">&#128203;</span> Roster</h2><p class="small muted mb0">Sorted by attainment. Click a column to re-sort.</p></div>
+</div>
+
+<div class="card" data-reveal>
+  <div class="table-wrap">
+    <table class="tbl" data-sortable>
+      <thead>
+        <tr>
+          <th>Agent</th><th>Agent ID</th><th class="num">Attainment</th>
+          <th class="num">Points</th><th>Tier</th><th class="num">Rank</th>
+          <th class="num">Open disputes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>
+            <td>
+              <div class="person">
+                <span class="avatar sm">{{ r.agent.initials }}</span>
+                <span><b>{{ r.agent.full_name }}</b><br>
+                  <span class="small muted">{{ r.agent.role }}</span></span>
+              </div>
+            </td>
+            <td class="nowrap">{{ r.agent.agent_id }}</td>
+            <td class="num" data-sort="{{ r.attainment }}">
+              <div class="mini-bar-wrap">
+                <span class="mini-num">{{ r.attainment }}%</span>
+                <span class="bar {{ r.attainment_class }}"><span style="width:{{ r.attainment }}%"></span></span>
+              </div>
+            </td>
+            <td class="num">{{ r.points }}</td>
+            <td><span class="badge">{{ r.tier }}</span></td>
+            <td class="num">{{ r.rank }}</td>
+            <td class="num">
+              {% if r.open_disputes %}<span class="badge amber">{{ r.open_disputes }}</span>
+              {% else %}<span class="muted">0</span>{% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="empty">No agents on this team.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section-title">
+  <div><h2><span class="head-ic red">&#9878;</span> Open disputes on this team</h2><p class="small muted mb0">Raised by your agents</p></div>
+</div>
+
+<div class="card" data-reveal>
+  <div class="table-wrap">
+    <table class="tbl" data-sortable>
+      <thead><tr><th>Agent</th><th>Ticket</th><th>Subject</th><th>Category</th><th>Priority</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for d in disputes %}
+          <tr>
+            <td class="nowrap">{{ d.agent.full_name }}</td>
+            <td class="nowrap">{{ d.ticket_no }}</td>
+            <td>{{ d.subject }}</td>
+            <td>{{ d.category }}</td>
+            <td><span class="badge {{ d.priority_class }}">{{ d.priority }}</span></td>
+            <td><span class="badge {{ d.status_class }}">{{ d.status }}</span></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="empty">Nothing open. Good.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

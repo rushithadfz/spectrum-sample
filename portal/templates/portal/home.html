@@ -1,0 +1,312 @@
+{% extends "portal/base.html" %}
+{% load portal_extras humanize %}
+
+{% block title %}Home &middot; Spectrum Incentive Portal{% endblock %}
+
+{% block content %}
+
+{% if reward and reward.die %}
+<div class="arrival" id="arrival" role="dialog" aria-modal="true" aria-labelledby="arrivalTitle">
+  <div class="arrival-card">
+    {% comment %}
+    The character does the greeting. It waves, says the person's name, and
+    only then does the card get to the numbers.
+    {% endcomment %}
+    <div class="greeter">
+      {% include "portal/_character.html" with mood="green" size="lg" wave=1 %}
+      <p class="greeter-say">Hi, {{ agent.first_name }}!</p>
+    </div>
+    <h2 id="arrivalTitle">
+      {% if reward.levelled_up %}Level {{ reward.level }} reached!
+      {% elif reward.streak_continued %}{{ reward.streak_days }}-day streak!
+      {% else %}Welcome back{% endif %}
+    </h2>
+    <p>{% if reward.streak_continued %}You have signed in {{ reward.streak_days }} days running.
+       {% else %}Good to see you again.{% endif %}</p>
+    {% if reward.die %}
+      {% comment %}
+      The face is already decided on the server; the animation only reveals
+      it, so what you see is what was banked.
+      {% endcomment %}
+      <div class="roll is-ready" data-face="{{ reward.die }}" data-rolled="0">
+        <button type="button" class="die-btn" id="die" aria-describedby="rollCaption"
+                aria-label="Roll your daily die">
+          <span class="die-stage">
+            <span class="cube">
+            <span class="face f1"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            <span class="face f2"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            <span class="face f3"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            <span class="face f4"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            <span class="face f5"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            <span class="face f6"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            </span>
+          </span>
+          <span class="die-hint">Tap<br>to roll</span>
+        </button>
+        <p class="roll-caption" id="rollCaption" aria-live="polite">
+          <span class="roll-verb">Your daily roll &mdash; XP is the face &times; 10</span>
+          <b class="roll-result" hidden>
+            {% if reward.die_already_rolled %}
+              Today&rsquo;s roll was {{ reward.die }} &mdash; already banked
+            {% else %}
+              You rolled {{ reward.die }} &middot; +{{ reward.die_xp }} XP
+            {% endif %}
+          </b>
+        </p>
+      </div>
+    {% endif %}
+
+    {% if reward.xp_awarded %}
+      <div class="arrival-xp">
+        <span id="arrivalXp" data-to="{{ reward.xp_awarded }}">+0</span> <span>XP for signing in</span>
+      </div>
+    {% endif %}
+    <div class="arrival-stats">
+      <div><b>{{ agent.level }}</b>Level</div>
+      <div><b>{{ reward.streak_days }}</b>Day streak</div>
+      <div><b>{{ agent.points_balance|intcomma }}</b>Points</div>
+    </div>
+    <button class="btn btn-primary btn-block" id="arrivalGo">Start selling &rarr;</button>
+  </div>
+</div>
+{% endif %}
+
+<!-- ---------- Greeting ---------- -->
+
+{% if next_action %}
+<a class="next-action tone-{{ next_action.tone }}" href="{{ next_action.url }}">
+  {% include "portal/_character.html" with mood=next_action.tone size="sm" %}
+  <span class="na-label">{{ next_action.label }}</span>
+  <span class="na-text">{{ next_action.text }}</span>
+  <span class="na-cta">{{ next_action.cta }} &rsaquo;</span>
+</a>
+{% endif %}
+
+<!-- ---------- Player HUD: rank, level, streak, season ---------- -->
+<section class="hud" data-reveal>
+  <div class="hud-glow" aria-hidden="true"></div>
+
+  <div class="hud-id">
+    <div class="hud-lvl">
+      <svg class="hud-ring" viewBox="0 0 96 96" data-ring="{{ agent.level_pct|default:0 }}"
+           role="img" aria-label="Level {{ agent.level }}, {{ agent.level_pct }} percent to next">
+        <circle class="ring-track" cx="48" cy="48" r="40" fill="none" stroke-width="6"/>
+        <circle class="ring-value" cx="48" cy="48" r="40" fill="none" stroke-width="6"
+                stroke-linecap="round" transform="rotate(-90 48 48)"/>
+      </svg>
+      <span class="hud-lvl-num">{{ agent.level }}</span>
+    </div>
+    <div class="hud-who">
+      <span class="hud-rank-title">{{ agent.rank_title }}</span>
+      <h2 class="hud-name">{{ agent.full_name }}</h2>
+      <div class="hud-xp">
+        <div class="hud-xp-track"><span style="width:{{ agent.level_pct|default:0 }}%"></span></div>
+        <span class="hud-xp-text">{{ agent.xp_into_level }} / {{ agent.xp_for_next_level }} XP</span>
+      </div>
+    </div>
+  </div>
+
+  {% comment %}
+  The character's home. At 34px beside a link it read as an icon; here it
+  is big enough to actually be a character, and it says the one thing the
+  page wants the agent to know.
+  {% endcomment %}
+  <div class="hud-buddy">
+    {% include "portal/_character.html" with mood=assistant_mood size="lg" %}
+    <p class="buddy-say">
+      {% if next_action %}{{ next_action.text }}{% else %}All clear &mdash; nothing needs you.{% endif %}
+    </p>
+  </div>
+
+  <div class="hud-stats">
+    <div class="hud-stat streak">
+      <span class="hs-val">{{ agent.streak_days|default:0 }}</span>
+      <span class="hs-key">day streak</span>
+    </div>
+    <div class="hud-stat">
+      <span class="hs-val">#{{ agent.scorecard.rank|default:"-" }}</span>
+      <span class="hs-key">of {{ agent.scorecard.rank_of|default:0 }} agents</span>
+    </div>
+    <div class="hud-stat">
+      <span class="hs-val">{{ agent.points_balance }}</span>
+      <span class="hs-key">points</span>
+    </div>
+    <div class="hud-stat season">
+      <span class="hs-val">{{ snapshot.days_left|default:0 }}d</span>
+      <span class="hs-key">season left</span>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- Composed stat panel + badges + tier ---------- -->
+<div class="home-top" data-reveal>
+
+  <!-- everything about this period, in one panel -->
+  <section class="stat-panel">
+    <h3>Monthly Incentive Earnings</h3>
+    <div class="stat-hero">
+      <div class="amount"><span class="cur">$</span><span class="countup" data-to="{{ monthly_earnings|floatformat:0 }}">0</span></div>
+      <span class="delta-pill up">&#9650; 4%</span>
+    </div>
+    {% if snapshot %}<div class="stat-ytd">YTD: {{ snapshot.ytd_earned|money0 }}</div>{% endif %}
+
+
+    <div class="stat-mini-row">
+      <div class="stat-mini">
+        <div class="label">Projected Payout</div>
+        <div class="value">{{ projected_payout|money0 }}</div>
+        <div class="sub">This month</div>
+      </div>
+      <div class="stat-mini">
+        <div class="label">Active Incentives</div>
+        <div class="value">{{ active_count }}</div>
+        <div class="sub">of {{ programs_total }} programs</div>
+      </div>
+    </div>
+
+    <div class="stat-progress">
+      <div class="row"><span>Period Progress</span><b>{{ snapshot.unit_pct|default:0 }}%</b></div>
+      <div class="stat-track"><span style="width:{{ snapshot.unit_pct|default:0 }}%"></span></div>
+    </div>
+
+    <div class="stat-lines">
+      <div class="stat-line"><span>Pay date</span><b>{{ agent.scorecard.pay_date|date:"M j"|default:"&mdash;" }}</b></div>
+    </div>
+
+    {% if chart %}
+    <div class="stat-trend">
+      <div class="trend-head">
+        <div class="cap">Earnings, last 6 months</div>
+        <div class="trend-legend">
+          <span class="dot-key"></span> Monthly payout
+          <b>Peak {{ chart.peak.month }} &middot; {{ chart.peak.amount|money0 }}</b>
+        </div>
+      </div>
+
+      <figure class="area-wrap">
+        <svg class="area-chart" viewBox="0 0 {{ chart.width }} {{ chart.height }}"
+             preserveAspectRatio="none" role="img"
+             aria-label="Monthly earnings for the last six months">
+          <defs>
+            <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   class="fill-top"/>
+              <stop offset="100%" class="fill-bottom"/>
+            </linearGradient>
+          </defs>
+          <path class="area-body" d="{{ chart.area }}" fill="url(#areaFill)"/>
+          <path class="area-line" d="{{ chart.line }}" fill="none"
+                vector-effect="non-scaling-stroke"/>
+        </svg>
+
+        {# Dots and labels sit outside the stretched SVG so they stay round. #}
+        <div class="area-points">
+          {% for pt in chart.points %}
+            <div class="area-pt {% if pt.is_last %}now{% endif %}"
+                 style="left:{% widthratio pt.x chart.width 100 %}%;
+                        top:{% widthratio pt.y chart.height 100 %}%">
+              <span class="pt-dot"></span>
+              <span class="pt-tip">{{ pt.amount|money0 }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      </figure>
+
+      <div class="area-axis">
+        {% for pt in chart.points %}<span>{{ pt.month }}</span>{% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </section>
+
+
+  <!-- Where this agent sits on the tier ladder, and what the next rung pays -->
+  {% if tier %}
+  <section class="card tier-card">
+    <div class="card-head">
+      <h2>Your tier</h2>
+      <a class="enter" href="{% url 'portal:incentive_detail' %}">Full ladder &rsaquo;</a>
+    </div>
+    <div class="card-pad">
+      <div class="tier-now">
+        <span class="tier-name">{{ tier.current.name|default:"Unranked" }}</span>
+        <span class="tier-pts">{{ tier.points }} pts</span>
+      </div>
+
+      {% if tier.at_top %}
+        <p class="tier-lead">Top tier reached. Nothing above this one.</p>
+        <div class="tier-track"><span style="width:100%"></span></div>
+      {% else %}
+        <p class="tier-lead">
+          <b>{{ tier.to_go }}</b> points to <b>{{ tier.next.name }}</b>
+        </p>
+        <div class="tier-track"><span style="width:{{ tier.pct }}%"></span></div>
+        <div class="tier-legend">
+          <span>{{ tier.current.threshold_points|default:0 }}</span>
+          <span>{{ tier.next.threshold_points }}</span>
+        </div>
+        <div class="tier-worth">
+          <span class="tw-label">Reaching it is worth</span>
+          <span class="tw-amount">+{{ tier.uplift|money0 }}</span>
+        </div>
+      {% endif %}
+
+    </div>
+  </section>
+  {% endif %}
+
+</div>
+
+{% if quests %}
+<section class="card card-pad" data-reveal style="margin-bottom:18px">
+  <div class="quest-head">
+    <div>
+      <h2 style="margin-bottom:2px">Daily Quests</h2>
+      <p class="small muted mb0">Finish them for bonus XP &mdash; they reset each day</p>
+    </div>
+    <span class="tally">{{ quests_done }}/{{ quests_total }} done</span>
+  </div>
+
+  <ul class="quest-list">
+    {% for q in quests %}
+      <li class="quest {% if q.completed %}done{% endif %}">
+        <span class="quest-ic">{{ q.icon }}</span>
+        <span class="quest-body">
+          <span class="quest-name">
+            {{ q.name }}
+            {% if q.completed %}<span class="badge green">Claimed</span>{% endif %}
+          </span>
+          <span class="quest-desc">{{ q.description }}</span>
+          <span class="quest-track"><span style="width:{{ q.pct }}%"></span></span>
+        </span>
+        {% if q.is_claimable %}
+          <form method="post" action="{% url 'portal:claim_quest' q.pk %}">
+            {% csrf_token %}
+            <button class="quest-claim" type="submit">Claim +{{ q.xp }}</button>
+          </form>
+        {% else %}
+          <span class="quest-xp">{% if q.completed %}&#10003;{% else %}+{{ q.xp }} XP{% endif %}</span>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<!-- ---------- Active incentives ---------- -->
+<div class="section-title">
+  <div>
+    <h2>Active Incentives</h2>
+    <p class="small muted mb0">Newly released and ongoing programs</p>
+  </div>
+  <a class="more" href="{% url 'portal:incentive_feed' %}">See All Incentives</a>
+</div>
+
+<div class="grid grid-3" data-reveal>
+  {% for i in active_incentives %}
+    {% include "portal/_program_card.html" with program=i %}
+  {% empty %}
+    <div class="card empty" style="grid-column:1/-1">No active programs this period.</div>
+  {% endfor %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}Reports &middot; Spectrum Incentive Portal{% endblock %}
+
+{% block content %}
+
+<div class="page-head-row">
+  <div>
+    <p class="sec-eyebrow">Built from live records</p>
+    <h1 class="page-h1">Reports</h1>
+    <p class="muted mb0">
+      Scoped to what you can see &mdash; {{ scope_agents }} agent(s) across
+      {{ scope_teams }} team(s). Every download is generated now, not stored.
+    </p>
+  </div>
+  <div class="ranking-pill">
+    <span class="rk-label">Generated</span>
+    <b>{{ generated|date:"M j, H:i" }}</b>
+  </div>
+</div>
+
+<div class="report-grid" data-reveal>
+  {% for c in cards %}
+    <article class="card report-card">
+      <div class="card-pad">
+        <div class="rc-top">
+          <h2>{{ c.name }}</h2>
+          <span class="rc-count">{{ c.count }} row{{ c.count|pluralize }}</span>
+        </div>
+        <p class="rc-blurb">{{ c.blurb }}</p>
+        <div class="rc-actions">
+          <a class="btn btn-ghost btn-sm" href="{% url 'portal:report_detail' c.slug %}">Preview</a>
+          <a class="btn btn-ghost btn-sm" href="{% url 'portal:report_csv' c.slug %}">CSV</a>
+          <a class="btn btn-primary btn-sm" href="{% url 'portal:report_pdf' c.slug %}">PDF</a>
+        </div>
+      </div>
+    </article>
+  {% endfor %}
+</div>
+
+{% endblock %}

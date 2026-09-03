@@ -1,0 +1,326 @@
+/* ============================================================
+   RESTRAINT
+
+   An audit counted 23 distinct saturated colours across four
+   pages. Most carried no meaning: leftover beige rules from an
+   earlier direction, three near-identical light blues, and a set
+   of per-category tints that only said "this tile is not the one
+   next to it".
+
+   The palette is now eight Spectrum values plus neutrals, and
+   every one of them means something:
+
+     #0073d1  brand, primary action, live data
+     #005ca9  the pressed/hover state of the above
+     #003057  chrome
+     #001b33  ink and the dark surfaces
+     #e8f3fc  the one tint
+     #128a4b  approved / positive
+     #b26b00  awaiting a decision
+     #c8102e  rejected / urgent
+
+   Decorative cycling is gone. If a colour appears, it is saying
+   something.
+   ============================================================ */
+
+[data-theme="press"] {
+  /* Was #d9d0be - a warm beige carried over from a cream ground,
+     drawn 40-60 times a page against white. */
+  --line-soft: #d9e2ea;
+  --faint: #6b7a8a;
+}
+
+/* ---- One light blue, not three ---- */
+[data-theme="press"] .wordmark-tick,
+[data-theme="press"] .brand-sub,
+[data-theme="press"] .stat-hero .amount .cur,
+[data-theme="press"] .stat-mini .sub,
+[data-theme="press"] .side-nav a.on .side-ic,
+[data-theme="press"] .hud-stat.season .hs-val,
+[data-theme="press"] .hud-stat.streak .hs-val { color: #7fc4f2; }
+[data-theme="press"] .hud-ring .ring-value { stroke: #7fc4f2; }
+[data-theme="press"] .hud-xp-track > span { background: #7fc4f2; }
+
+/* The notification dot was a pink that belongs to no palette. */
+[data-theme="press"] .bell-dot { background: #c8102e; border-color: #001b33; }
+
+/* ---- Product thumbnails: one tint, the icon carries the meaning ---- */
+[data-theme="press"] .product .thumb,
+[data-theme="press"] .product[data-cat="Internet"]  .thumb,
+[data-theme="press"] .product[data-cat="Mobile"]    .thumb,
+[data-theme="press"] .product[data-cat="TV"]        .thumb,
+[data-theme="press"] .product[data-cat="Voice"]     .thumb,
+[data-theme="press"] .product[data-cat="Equipment"] .thumb,
+[data-theme="press"] .product[data-cat="Business"]  .thumb {
+  background: #e8f3fc;
+  border: 1px solid #d9e2ea;
+  color: #0073d1;
+}
+
+/* ---- No decorative cycling anywhere ----
+   Avatars, roster bars, channel rows and programme spines were
+   cycling six hues purely to look varied. */
+[data-theme="press"] tbody tr .avatar,
+[data-theme="press"] .persona-list li .persona-avatar,
+[data-theme="press"] .avatar { background: #0073d1; }
+[data-theme="press"] tbody tr .bar > span,
+[data-theme="press"] .channel .bar > span,
+[data-theme="press"] .bar > span { background: #0073d1; }
+[data-theme="press"] .channel .entity-ic { color: #0073d1; }
+
+[data-theme="press"] .program-accent,
+[data-theme="press"] .grid > .program .program-accent { display: none; }
+[data-theme="press"] .grid > .program,
+[data-theme="press"] .program { background: #fff; border-color: #d9e2ea; }
+
+/* Section headings share one accent; the words already differ. */
+[data-theme="press"] .section-title h2,
+[data-theme="press"] .section-title.tone-blue h2,
+[data-theme="press"] .section-title.tone-violet h2,
+[data-theme="press"] .section-title.tone-amber h2 { color: #001b33; }
+[data-theme="press"] .section-title h2::before { background: #0073d1; }
+
+/* KPI tiles: the figure matters, not the tile's hue. Only a tile
+   reporting a problem earns colour. */
+[data-theme="press"] .kpi,
+[data-theme="press"] .kpi.blue, [data-theme="press"] .kpi.teal,
+[data-theme="press"] .kpi.violet, [data-theme="press"] .kpi.green {
+  background: #fff; border: 1px solid #d9e2ea;
+}
+[data-theme="press"] .kpi *,
+[data-theme="press"] .kpi.blue *, [data-theme="press"] .kpi.teal *,
+[data-theme="press"] .kpi.violet *, [data-theme="press"] .kpi.green * {
+  color: inherit !important;
+}
+[data-theme="press"] .kpi .kpi-value { color: #001b33 !important; }
+[data-theme="press"] .kpi .kpi-label,
+[data-theme="press"] .kpi .kpi-sub { color: #5b6b7b !important; }
+[data-theme="press"] .kpi .kpi-chip { color: #0073d1 !important; }
+/* Waiting and failing still speak. */
+[data-theme="press"] .kpi.amber { border-color: #e8cfa3; }
+[data-theme="press"] .kpi.amber .kpi-chip { color: #b26b00 !important; }
+[data-theme="press"] .kpi.red   { border-color: #f0c4cc; }
+[data-theme="press"] .kpi.red .kpi-chip { color: #c8102e !important; }
+[data-theme="press"] .kpi.red .kpi-value { color: #c8102e !important; }
+
+/* Card tints removed: white surfaces, one hairline. */
+[data-theme="press"] .card { background: #fff; }
+[data-theme="press"] .stat-mini { background: #e8f3fc; border: 1px solid #d9e2ea; }
+[data-theme="press"] .spec-mini li:nth-child(odd) { background: transparent; }
+[data-theme="press"] table.tbl tbody tr:nth-child(even) { background: #f7fafd; }
+[data-theme="press"] table.tbl tbody tr:hover { background: #e8f3fc; }
+
+
+/* ---- Collapse the last near-duplicates ----
+   #9a6b00 was a second amber beside Spectrum's #b26b00; #bfe0f7,
+   #cfe1f2 and #8fb6d4 were three more light blues doing the job
+   of one. Each pair was indistinguishable on screen and only
+   widened the palette. */
+[data-theme="press"] .hud-rank-title { color: #7fc4f2; }
+[data-theme="press"] .tier-worth { border-color: #d9e2ea; }
+[data-theme="press"] .house .muted,
+[data-theme="press"] .house-pts span,
+[data-theme="press"] .who-meta { color: #5b6b7b !important; }
+[data-theme="press"] .program .days.soon { color: #b26b00; }
+
+
+/* ---- The claim button ----
+   It was a gold-to-green gradient from the old game layer: two
+   colours, neither in the palette, in a theme that has none. It is
+   a primary action, so it looks like every other primary action. */
+[data-theme="press"] .quest-claim {
+  background: #0073d1;
+  background-image: none;
+  color: #fff;
+  border: 1px solid #0073d1;
+  border-radius: 8px;
+  box-shadow: none;
+  animation: none;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .02em;
+  padding: 8px 14px;
+}
+[data-theme="press"] .quest-claim:hover {
+  background: #005ca9; border-color: #005ca9;
+  transform: translateY(-1px); box-shadow: none;
+}
+[data-theme="press"] .quest-claim:active { transform: translateY(0); }
+
+/* The XP figure beside it was gold for the same reason. */
+[data-theme="press"] .quest-xp { color: #0073d1; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="press"] .quest-claim:hover { transform: none; }
+}
+
+
+/* ============================================================
+   The brown
+
+   Four warm greys survived from the cream direction and were
+   still painting on navy and white, where they read as brown:
+
+     #b8b0a2  wordmark subtitle, user role, HUD stat labels
+     #5c564d  every .small.muted - 24 of them on the sales page
+     #d8d0c2  the HUD's XP readout
+     #cfc7b8  small text on dark card headers
+
+   They are replaced by neutrals mixed from Spectrum navy, so
+   secondary text is cool rather than sepia.
+   ============================================================ */
+[data-theme="press"] .wordmark-sub,
+[data-theme="press"] .user-role,
+[data-theme="press"] .hs-key { color: #9fb3c6 !important; }
+
+[data-theme="press"] .hud-xp-text { color: #b9cddd !important; }
+
+[data-theme="press"] .card-head .small,
+[data-theme="press"] .card-head .muted,
+[data-theme="press"] .card-head .tally { color: #b9cddd !important; }
+
+[data-theme="press"] .small.muted,
+[data-theme="press"] .sub,
+[data-theme="press"] .stat-ytd,
+[data-theme="press"] .stat-mini .sub,
+[data-theme="press"] .kpi-sub,
+[data-theme="press"] .stat-panel .sub,
+[data-theme="press"] .stat-panel .stat-ytd { color: #5b6b7b; }
+/* On the dark header those stay light - the rule above is for white ground. */
+[data-theme="press"] .card-head .small.muted { color: #b9cddd !important; }
+
+/* ---- Amber only where it means "waiting" ---- */
+
+/* "Full ladder" is a link, not a warning. */
+[data-theme="press"] .card-head .enter,
+[data-theme="press"] .card-head a,
+[data-theme="press"] .enter { color: #7fc4f2 !important; }
+
+/* The reward chip is money earned - positive, not pending. */
+[data-theme="press"] .program .reward {
+  background: #e6f4ec;
+  color: #0d6b3c;
+  border: 1px solid #bfe0cd;
+}
+
+/* The wordmark tick was amber against navy: brand blue instead. */
+[data-theme="press"] .wordmark-tick { color: #7fc4f2; }
+
+/* The level marker was Spectrum red, which here means rejected. */
+[data-theme="press"] .lvl-dot,
+[data-theme="press"] .side-xp .lvl-dot { background: #0073d1 !important; }
+
+
+/* ============================================================
+   Month-end close
+   Three steps that must happen in order, so the page shows the
+   order rather than three equal buttons.
+   ============================================================ */
+.close-steps {
+  list-style: none; margin: 0 0 4px; padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px;
+}
+.close-steps li {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 16px; border: 1px solid #d9e2ea; border-radius: 10px;
+  background: #fff;
+}
+.cs-n {
+  flex: none; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 12px; font-weight: 700;
+  background: #eef2f6; color: #5b6b7b; border: 1px solid #d9e2ea;
+}
+.cs-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.cs-body b { font-size: 13.5px; color: #001b33; }
+.cs-body span { font-size: 12px; color: #5b6b7b; }
+
+/* The step you are on. */
+.close-steps li.now { border-color: #0073d1; box-shadow: 0 0 0 3px rgba(0,115,209,.10); }
+.close-steps li.now .cs-n { background: #0073d1; color: #fff; border-color: #0073d1; }
+/* Steps already behind you. */
+.close-steps li.done .cs-n { background: #128a4b; color: #fff; border-color: #128a4b; }
+.close-steps li.done .cs-body b { color: #0d6b3c; }
+
+.close-total {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 14px; flex-wrap: wrap;
+  padding-bottom: 14px; border-bottom: 1px solid #d9e2ea;
+}
+.ct-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: #5b6b7b;
+}
+.ct-value {
+  font-family: "Montserrat", system-ui, sans-serif;
+  font-size: 38px; font-weight: 700; letter-spacing: -.03em; color: #001b33;
+  font-variant-numeric: tabular-nums;
+}
+.close-breakdown { list-style: none; margin: 14px 0 0; padding: 0; }
+.close-breakdown li {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 14px; padding: 9px 0; border-bottom: 1px solid #eef2f6; font-size: 13px;
+}
+.close-breakdown li:last-child { border-bottom: 0; }
+.close-breakdown span { color: #5b6b7b; }
+.close-breakdown b { color: #001b33; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 860px) {
+  .close-steps { grid-template-columns: 1fr; }
+  .ct-value { font-size: 30px; }
+}
+
+
+/* Plan version marker. */
+.ver {
+  display: inline-block; margin-left: 6px; padding: 1px 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: .04em;
+  background: #e8f3fc; color: #005ca9; border: 1px solid #cfe1f2; border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ---- The rewards panel ----
+   portal.css paints .house as a dark gradient with white text. This theme
+   repaints .card white, which wins on specificity - so the background went
+   white and the text stayed white. Ink it properly. */
+[data-theme="press"] .house,
+[data-theme="press"] .house-card {
+  background: #001b33 !important;
+  border: 1px solid #001b33;
+  color: #dbe7f2;
+}
+[data-theme="press"] .house h2,
+[data-theme="press"] .house h3,
+[data-theme="press"] .house b,
+[data-theme="press"] .house .person b,
+[data-theme="press"] .house-card h3 { color: #fff !important; }
+[data-theme="press"] .house .small,
+[data-theme="press"] .house .muted,
+[data-theme="press"] .house .sub,
+[data-theme="press"] .house .person span:not(.avatar),
+[data-theme="press"] .house-card .small,
+[data-theme="press"] .house-card .muted { color: #9fb3c6 !important; }
+[data-theme="press"] .house .avatar {
+  color: #fff !important;
+  background: #0073d1 !important;
+  box-shadow: 0 0 0 2px #001b33, 0 0 0 3px rgba(255,255,255,.35);
+}
+[data-theme="press"] .house .enter,
+[data-theme="press"] .house-card .enter { color: #7fc4f2 !important; }
+[data-theme="press"] .house .btn-primary {
+  background: #fff; color: #001b33; border-color: #fff;
+}
+
+
+/* ---- Chart colours (layout lives in chart.css) ---- */
+[data-theme="press"] .area-chart .area-line { stroke: #0073d1; stroke-width: 2.5; }
+[data-theme="press"] .area-chart .fill-top { stop-color: #0073d1; stop-opacity: .18; }
+[data-theme="press"] .area-chart .fill-bottom { stop-color: #0073d1; stop-opacity: 0; }
+[data-theme="press"] .pt-dot { color: #0073d1; background: #fff; }
+[data-theme="press"] .area-pt.now .pt-dot,
+[data-theme="press"] .area-pt.active .pt-dot { background: #0073d1; }
+[data-theme="press"] .pt-tip { background: #001b33; color: #fff; }
+[data-theme="press"] .area-axis { color: #5b6b7b; }
+[data-theme="press"] .dot-key { background: #0073d1; }
+[data-theme="press"] .trend-legend { color: #5b6b7b; }
+[data-theme="press"] .trend-legend b { color: #001b33; }

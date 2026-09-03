@@ -1,0 +1,54 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}Products &middot; Agent Portal{% endblock %}
+
+{% block content %}
+
+<div class="page-head-row">
+  <div>
+    <h1 class="page-h1">Product catalog</h1>
+    <p class="muted mb0">Full specifications, sales collateral and public product links for everything in the catalog. Search matches spec text, not just names &mdash; try &ldquo;DOCSIS&rdquo; or &ldquo;WiFi 7&rdquo;.</p>
+  </div>
+</div>
+{% include "portal/_filters.html" with all_label="All products" noun="products" placeholder="Search by name, SKU or spec, e.g. WiFi 7, DOCSIS, upload" %}
+
+<div class="grid grid-4" data-filter-root>
+  {% for p in products %}
+    {% include "portal/_cards.html" with product=p %}
+  {% endfor %}
+  <div class="card empty" id="emptyState" style="grid-column:1/-1" {% if visible %}hidden{% endif %}>
+    <span class="big">&#8981;</span>
+    No products match those filters.
+    <div style="margin-top:12px"><a class="btn btn-ghost btn-sm" href="{% url 'portal:products' %}">Reset filters</a></div>
+  </div>
+</div>
+
+<div class="section-title"><h2>Specification comparison</h2></div>
+<div class="card">
+  <div class="table-wrap">
+    <table class="tbl" data-sortable>
+      <thead>
+        <tr><th>Product</th><th>SKU</th><th>Category</th><th>Key spec</th><th>Second spec</th><th>Price</th><th data-nosort></th></tr>
+      </thead>
+      <tbody>
+        {% for p in all_products %}
+          <tr>
+            <td><a href="{{ p.get_absolute_url }}">{{ p.icon }} {{ p.name }}</a></td>
+            <td class="nowrap">{{ p.sku }}</td>
+            <td><span class="tag">{{ p.category }}</span></td>
+            {% for h in p.highlights.all|slice:":2" %}
+              <td class="nowrap">{{ h.label }}: <b>{{ h.value }}</b></td>
+            {% empty %}
+              <td>&mdash;</td><td>&mdash;</td>
+            {% endfor %}
+            <td class="nowrap">{{ p.price_note }}</td>
+            <td class="right"><a class="btn btn-ghost btn-sm" href="{{ p.get_absolute_url }}">Specs</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

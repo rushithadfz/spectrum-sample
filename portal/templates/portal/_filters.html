@@ -1,0 +1,33 @@
+{% comment %}
+Category chips + search, shared by offers / products / incentives.
+
+Chips and the search box are real links/inputs that work without JavaScript
+(the server filters and renders the right set). filters.js takes over on load
+and makes further filtering instant.
+{% endcomment %}
+<form class="filters" method="get" role="search">
+  <div class="chips">
+    <a class="chip {% if cat == 'All' %}on{% endif %}" data-chip="All"
+       href="?{% if query %}q={{ query|urlencode }}{% endif %}">{{ all_label|default:"All" }}</a>
+    {% for c in chips %}
+      <a class="chip {% if cat == c %}on{% endif %}" data-chip="{{ c }}"
+         href="?cat={{ c|urlencode }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}">{{ c }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="search">
+    {% if cat != 'All' %}<input type="hidden" name="cat" value="{{ cat }}">{% endif %}
+    <input id="filterInput" type="search" name="q" value="{{ query }}"
+           placeholder="{{ placeholder }}" autocomplete="off"
+           aria-label="{{ placeholder }}">
+    <kbd class="slash-hint" aria-hidden="true">/</kbd>
+  </div>
+
+  <button class="btn btn-dark btn-sm" type="submit" data-filter-submit>Search</button>
+  <a class="btn btn-ghost btn-sm" id="clearFilters" href="{{ request.path }}"
+     {% if cat == 'All' and not query %}hidden{% endif %}>Clear</a>
+
+  <span class="result-count">
+    <b id="resultCount">{{ visible }}</b> {{ noun|default:"results" }}
+  </span>
+</form>

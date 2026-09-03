@@ -1,0 +1,84 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}Channels &middot; Spectrum Incentive Portal{% endblock %}
+
+{% block content %}
+
+<div class="page-head-row">
+  <div>
+    <p class="sec-eyebrow">{{ regions|join:" &middot; " }}</p>
+    <h1 class="page-h1">Channels</h1>
+    <p class="muted mb0">How each route to market is performing, and what it costs.</p>
+  </div>
+  <div class="ranking-pill">
+    <span class="rk-label">Total spend</span>
+    <b>{{ total_spend|money0 }}</b>
+  </div>
+</div>
+
+<div class="kpi-row" data-reveal>
+  {% include "portal/_kpi.html" with label="Channels" value=rows|length icon="&#128225;" tone="blue" sub="in your region" %}
+  {% include "portal/_kpi.html" with label="Agents" value=total_agents icon="&#128101;" tone="teal" sub="across all channels" %}
+  {% include "portal/_kpi.html" with label="Avg spend / agent" value=avg_payout|money0 icon="&#128176;" tone="violet" sub="channel-wide" %}
+  {% if best %}
+    {% include "portal/_kpi.html" with label="Strongest" value=best.name icon="&#9989;" tone="green" sub=best.attainment|stringformat:"s" %}
+  {% endif %}
+</div>
+
+<div class="card" data-reveal style="margin-top:18px">
+  <div class="card-head">
+    <h2>All channels</h2>
+    <span class="small muted">Share of regional spend</span>
+  </div>
+  <div class="table-wrap">
+    <table class="tbl" data-sortable>
+      <thead>
+        <tr><th>Channel</th><th class="num">Agents</th><th class="num">Total spend</th>
+            <th class="num">Avg payout</th><th>Attainment</th><th>Share</th><th>Movement</th></tr>
+      </thead>
+      <tbody>
+        {% for c in rows %}
+          <tr>
+            <td class="nowrap"><b>{{ c.name }}</b><br><span class="small muted">{{ c.region }}</span></td>
+            <td class="num">{{ c.agents }}</td>
+            <td class="num money" data-sort="{{ c.spend }}">{{ c.spend|money0 }}</td>
+            <td class="num money">{{ c.avg_payout|money }}</td>
+            <td>
+              <div class="mini-bar-wrap">
+                <span class="mini-num">{{ c.attainment }}%</span>
+                <span class="bar {{ c.bar_class }}"><span style="width:{{ c.attainment }}%"></span></span>
+              </div>
+            </td>
+            <td>
+              <div class="mini-bar-wrap">
+                <span class="mini-num">{{ c.share }}%</span>
+                <span class="bar"><span style="width:{{ c.share }}%"></span></span>
+              </div>
+            </td>
+            <td>
+              <span class="diff-pill {{ c.direction }}">
+                {% if c.direction == "down" %}&darr;{% else %}&uarr;{% endif %} {{ c.change_pct }}%
+              </span>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="empty">No channel data for your region.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if best and worst and best != worst %}
+<div class="card card-pad" data-reveal style="margin-top:18px">
+  <h3>Where the gap is</h3>
+  <p class="small muted mb0">
+    <b>{{ best.name }}</b> is running at {{ best.attainment }}% while
+    <b>{{ worst.name }}</b> sits at {{ worst.attainment }}%. That spread is
+    where an incentive plan will move the most units.
+  </p>
+</div>
+{% endif %}
+
+{% endblock %}

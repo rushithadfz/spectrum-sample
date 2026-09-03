@@ -1,0 +1,14 @@
+# Runtime dependencies.
+
+Django==5.2.17
+asgiref==3.12.1
+sqlparse==0.6.0
+tzdata==2026.3
+
+# Report downloads (Reports -> PDF).
+reportlab==5.0.1
+
+# Optional: lets the in-portal assistant answer through Claude. Without it
+# the assistant falls back to matching questions against the database, so
+# the portal runs fine with this uninstalled.
+anthropic>=0.40

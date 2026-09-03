@@ -1,0 +1,103 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}Agent Directory &middot; Spectrum Incentive Portal{% endblock %}
+
+{% block content %}
+
+<div class="page-head-row">
+  <div>
+    <p class="sec-eyebrow">Everyone you can see</p>
+    <h1 class="page-h1">Agent Directory</h1>
+    <p class="muted mb0">Search, filter and sort across every agent in your scope.</p>
+  </div>
+  <div class="ranking-pill">
+    <span class="rk-label">{% if filtered %}Matching{% else %}Agents{% endif %}</span>
+    <b>{{ total }}</b>
+  </div>
+</div>
+
+<form class="filters" method="get" role="search">
+  <div class="search">
+    <input id="filterInput" type="search" name="q" value="{{ query }}"
+           placeholder="Search name, team or market" autocomplete="off"
+           aria-label="Search agents">
+    <kbd class="slash-hint" aria-hidden="true">/</kbd>
+  </div>
+  <select name="team" data-autofilter aria-label="Filter by team">
+    <option value="">All teams</option>
+    {% for t in teams %}
+      <option value="{{ t }}" {% if t == team %}selected{% endif %}>{{ t }}</option>
+    {% endfor %}
+  </select>
+  <select name="sort" data-autofilter aria-label="Sort by">
+    {% for key, spec in sorts.items %}
+      <option value="{{ key }}" {% if key == sort %}selected{% endif %}>Sort: {{ spec.1 }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn btn-dark btn-sm" type="submit" data-filter-submit>Search</button>
+  {% if filtered %}
+    <a class="btn btn-ghost btn-sm" href="{% url 'portal:directory' %}">Clear</a>
+  {% endif %}
+</form>
+
+<div class="card" data-reveal>
+  <div class="table-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Agent</th><th>Team</th><th>Market</th>
+          <th class="num">Units</th><th class="num">Variable pay</th><th>Attainment</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>
+            <td class="nowrap">
+              <div class="person">
+                <span class="avatar sm">{{ r.agent.initials }}</span>
+                <span><b>{{ r.full_name }}</b><br>
+                  <span class="small muted">{{ r.agent.get_role_type_display }}</span></span>
+              </div>
+            </td>
+            <td>{{ r.team }}</td>
+            <td class="small muted">{{ r.market }}</td>
+            <td class="num">{{ r.units }}</td>
+            <td class="num money">{{ r.payout|money }}</td>
+            <td>
+              <div class="mini-bar-wrap">
+                <span class="mini-num">{{ r.attainment }}%</span>
+                <span class="bar {{ r.attainment_class }}"><span style="width:{{ r.attainment }}%"></span></span>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="empty">No agent matches those filters.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page.paginator.num_pages > 1 %}
+    <nav class="pager" aria-label="Pagination">
+      {% if page.has_previous %}
+        <a class="btn btn-ghost btn-sm" href="?page={{ page.previous_page_number }}{{ querystring }}">&lsaquo; Previous</a>
+      {% else %}
+        <span class="btn btn-ghost btn-sm" aria-disabled="true">&lsaquo; Previous</span>
+      {% endif %}
+
+      <span class="pager-count">
+        {{ page.start_index }}&ndash;{{ page.end_index }} of {{ total }}
+        &middot; page {{ page.number }} of {{ page.paginator.num_pages }}
+      </span>
+
+      {% if page.has_next %}
+        <a class="btn btn-ghost btn-sm" href="?page={{ page.next_page_number }}{{ querystring }}">Next &rsaquo;</a>
+      {% else %}
+        <span class="btn btn-ghost btn-sm" aria-disabled="true">Next &rsaquo;</span>
+      {% endif %}
+    </nav>
+  {% endif %}
+</div>
+
+{% endblock %}

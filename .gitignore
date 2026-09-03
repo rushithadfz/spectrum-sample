@@ -1,0 +1,36 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# --- Django ---
+# The demo database is rebuilt from seed_demo, so it is never committed.
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/
+*.log
+
+# --- Secrets ---
+# See .env.example for the variables this project reads.
+.env
+.env.*
+!.env.example
+
+# --- Local tooling, not part of the project ---
+.claude/
+.snapshots/
+
+# --- Recordings ---
+# Screen captures are large binaries; share them outside the repo.
+demo/
+*.webm
+*.mp4
+
+# --- Editors / OS ---
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

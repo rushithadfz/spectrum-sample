@@ -1,0 +1,290 @@
+{% load static portal_extras %}<!DOCTYPE html>
+{# One visual style, so this is a constant rather than a boot script. #}
+<html lang="en" data-theme="press">
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Spectrum Incentive Portal{% endblock %}</title>
+<link rel="stylesheet" href="{% static_v 'css/app.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/login.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/portal.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/shell.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/anim.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/chart.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/themes.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/play.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/arena.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/icons.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/press.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/restraint.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/surfaces.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/character.css' %}">
+<link rel="stylesheet" href="{% static_v 'css/dice.css' %}">
+</head>
+<body class="app">
+
+<!-- ================= Top bar ================= -->
+<header class="topbar-blue">
+  <a class="wordmark" href="{% url 'portal:home' %}">
+    <span class="wordmark-name">Spectrum<span class="wordmark-tick">&#9656;</span></span>
+    <span class="wordmark-sub">Incentive Portal</span>
+  </a>
+
+  <div class="topbar-right">
+    <button class="ic-btn" id="omniOpen" type="button" aria-label="Search" title="Search (K)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg></button>
+
+    <div class="menu-wrap">
+      <button class="period-btn" type="button" data-menu="periodMenu">
+        {{ current_period.label|default:"August 2026" }} <span class="caret">&#9662;</span>
+      </button>
+      <div class="menu" id="periodMenu" hidden>
+        {% for p in periods %}
+          <a href="?month={{ p.label|urlencode }}" class="{% if p.is_current %}on{% endif %}">{{ p.label }}</a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="menu-wrap">
+      <button class="ic-btn bell" type="button" data-menu="notifMenu" aria-label="Notifications">
+        &#128276;{% if notifications %}<span class="bell-dot"></span>{% endif %}
+      </button>
+      <div class="menu menu-wide" id="notifMenu" hidden>
+        <div class="menu-head">
+          <b>Notifications</b>
+          <button type="button" class="linkish" id="clearNotifs">Clear all</button>
+        </div>
+        <div class="notif-list" id="notifList">
+          {% for n in notifications %}
+            <div class="notif">
+              <span class="badge {{ n.tone }}">{{ n.kind }}</span>
+              <p>{{ n.text }}</p>
+              <span class="ago">{{ n.ago }}</span>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="notif-empty" id="notifEmpty" hidden>No new notifications</div>
+      </div>
+    </div>
+
+    <div class="menu-wrap">
+      <button class="user-pill" type="button" data-menu="userMenu">
+        <span class="user-av">{% if agent %}{{ agent.initials }}{% else %}?{% endif %}</span>
+        <span class="user-text">
+          <span class="user-name">{% if agent %}{{ agent.full_name }}{% else %}{{ user.username }}{% endif %}</span>
+          <span class="user-role">{{ agent.get_role_type_display|default:"User" }}</span>
+        </span>
+        <span class="caret">&#9662;</span>
+      </button>
+      <div class="menu" id="userMenu" hidden>
+        <div class="menu-head column">
+          <b>{% if agent %}{{ agent.full_name }}{% endif %}</b>
+          <span class="small muted">{{ user.email }}</span>
+          <span class="badge">{{ agent.get_role_type_display }}</span>
+        </div>
+        {% if agent.is_agent %}
+          <a href="{% url 'portal:incentive_detail' %}">My scorecard</a>
+        {% endif %}
+        <a href="{% url 'portal:products' %}">Product catalog</a>
+        <a href="{% url 'admin:index' %}">Admin</a>
+        <form action="{% url 'logout' %}" method="post">{% csrf_token %}
+          <button type="submit" class="menu-logout">Log out</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ================= Sidebar ================= -->
+  <aside class="sidebar" id="sidebar">
+    <nav class="side-nav">
+      {% comment %}Each role gets its own set of pages.{% endcomment %}
+      <a href="{% url 'portal:home' %}" class="{% if active_nav == 'home' %}on{% endif %}">
+        <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.2 12 3l9 7.2M5.6 8.9V20h12.8V8.9M9.8 20v-6.2h4.4V20"/></svg></span><span class="side-label">Home</span></a>
+
+      {% if agent.is_agent %}
+        <a href="{% url 'portal:incentive_feed' %}" class="{% if active_nav == 'incentives' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h11l5 5v11H4zM15 4v5h5M8 13h8M8 17h5"/></svg></span><span class="side-label">Incentives</span></a>
+        <a href="{% url 'portal:sales' %}" class="{% if active_nav == 'sales' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2.2l2.1 10.4a1.5 1.5 0 0 0 1.5 1.2h7.9a1.5 1.5 0 0 0 1.5-1.2L20 7H6.2M9.5 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2M17 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/></svg></span><span class="side-label">Log a Sale</span></a>
+        <a href="{% url 'portal:incentive_detail' %}" class="{% if active_nav == 'points' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M9.5 20h5M12 14v6"/></svg></span><span class="side-label">Points Incentive</span></a>
+        <a href="{% url 'portal:calculator' %}" class="{% if active_nav == 'calculator' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18H6zM9 7h6M9 11h.01M12 11h.01M15 11h.01M9 14h.01M12 14h.01M15 14h.01M9 17h6"/></svg></span><span class="side-label">Earnings Calculator</span></a>
+        <a href="{% url 'portal:disputes' %}" class="{% if active_nav == 'disputes' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M5 7h14M7 7l-3 6h6zM17 7l-3 6h6z"/></svg></span><span class="side-label">Disputes</span></a>
+        <a href="{% url 'portal:products' %}" class="{% if active_nav == 'products' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3.5 7.5v9L12 21l8.5-4.5v-9zM3.5 7.5 12 12l8.5-4.5M12 12v9"/></svg></span><span class="side-label">Products</span></a>
+
+      {% elif agent.is_lead %}
+        <a href="{% url 'portal:team' %}" class="{% if active_nav == 'team' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9.5 4a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7M21 20v-2a4 4 0 0 0-3-3.9M16 4.1a4 4 0 0 1 0 7.8"/></svg></span><span class="side-label">My Team</span></a>
+        <a href="{% url 'portal:incentive_feed' %}" class="{% if active_nav == 'incentives' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h11l5 5v11H4zM15 4v5h5M8 13h8M8 17h5"/></svg></span><span class="side-label">Programmes</span></a>
+        <a href="{% url 'portal:trends' %}" class="{% if active_nav == 'trends' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18M6 20v-6M11 20V8M16 20v-9M21 20V5"/></svg></span><span class="side-label">Buying Trends</span></a>
+        <a href="{% url 'portal:plans' %}" class="{% if active_nav == 'plans' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h9l5 5v13H5zM14 3v5h5M9 13h6M9 17h6"/></svg></span><span class="side-label">Incentive Plans</span></a>
+        <a href="{% url 'portal:simulate' %}" class="{% if active_nav == 'simulate' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V9M10 20V4M16 20v-7M22 20h-2M2 20h2"/><circle cx="10" cy="4" r="1.6"/><circle cx="4" cy="9" r="1.6"/><circle cx="16" cy="13" r="1.6"/></svg></span><span class="side-label">Simulation</span></a>
+        <a href="{% url 'portal:sales' %}" class="{% if active_nav == 'sales' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h10M4 12h8M4 19h7M15.5 16.5l2.5 2.5 4.5-4.5"/></svg></span><span class="side-label">Sales Approvals</span></a>
+        <a href="{% url 'portal:disputes' %}" class="{% if active_nav == 'disputes' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M5 7h14M7 7l-3 6h6zM17 7l-3 6h6z"/></svg></span><span class="side-label">Dispute Queue</span></a>
+        <a href="{% url 'portal:channels' %}" class="{% if active_nav == 'channels' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v9M12 12a3 3 0 1 0 0 6 3 3 0 0 0 0-6M5 8a4 4 0 0 1 0-4M19 8a4 4 0 0 0 0-4M4 20h16"/></svg></span><span class="side-label">Channels</span></a>
+        <a href="{% url 'portal:directory' %}" class="{% if active_nav == 'directory' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20v-1.5A3.5 3.5 0 0 1 6.5 15h4a3.5 3.5 0 0 1 3.5 3.5V20M8.5 5.5a3 3 0 1 1 0 6 3 3 0 0 1 0-6M17 20v-1.5a3.5 3.5 0 0 0-2-3.2M15 5.7a3 3 0 0 1 0 5.6"/></svg></span><span class="side-label">Agent Directory</span></a>
+        <a href="{% url 'portal:reports' %}" class="{% if active_nav == 'reports' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h9l5 5v13H5zM14 3v5h5M9 13h6M9 17h4"/></svg></span><span class="side-label">Reports</span></a>
+        <a href="{% url 'portal:products' %}" class="{% if active_nav == 'products' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3.5 7.5v9L12 21l8.5-4.5v-9zM3.5 7.5 12 12l8.5-4.5M12 12v9"/></svg></span><span class="side-label">Products</span></a>
+
+      {% elif agent.is_manager %}
+        <a href="{% url 'portal:market' %}" class="{% if active_nav == 'market' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18M4 4h4v16H4zM10 9h4v11h-4zM16 13h4v7h-4z"/></svg></span><span class="side-label">Market</span></a>
+        <a href="{% url 'portal:close' %}" class="{% if active_nav == 'close' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5M12 14.5v2"/></svg></span><span class="side-label">Month-End Close</span></a>
+        <a href="{% url 'portal:spend' %}" class="{% if active_nav == 'spend' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M17 6.5C17 4.6 14.8 3.5 12 3.5S7 4.6 7 6.5s2.2 3 5 3.5 5 1.6 5 3.5-2.2 3-5 3-5-1.1-5-3"/></svg></span><span class="side-label">Spend</span></a>
+        <a href="{% url 'portal:team' %}" class="{% if active_nav == 'team' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9.5 4a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7M21 20v-2a4 4 0 0 0-3-3.9M16 4.1a4 4 0 0 1 0 7.8"/></svg></span><span class="side-label">Teams</span></a>
+        <a href="{% url 'portal:incentive_feed' %}" class="{% if active_nav == 'incentives' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h11l5 5v11H4zM15 4v5h5M8 13h8M8 17h5"/></svg></span><span class="side-label">Programmes</span></a>
+        <a href="{% url 'portal:trends' %}" class="{% if active_nav == 'trends' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18M6 20v-6M11 20V8M16 20v-9M21 20V5"/></svg></span><span class="side-label">Buying Trends</span></a>
+        <a href="{% url 'portal:plans' %}" class="{% if active_nav == 'plans' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h10M4 12h10M4 19h7M16.5 17.5l2 2 4-4"/></svg></span><span class="side-label">Approval Queue</span></a>
+        <a href="{% url 'portal:simulate' %}" class="{% if active_nav == 'simulate' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V9M10 20V4M16 20v-7M22 20h-2M2 20h2"/><circle cx="10" cy="4" r="1.6"/><circle cx="4" cy="9" r="1.6"/><circle cx="16" cy="13" r="1.6"/></svg></span><span class="side-label">Simulation</span></a>
+        <a href="{% url 'portal:disputes' %}" class="{% if active_nav == 'disputes' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M5 7h14M7 7l-3 6h6zM17 7l-3 6h6z"/></svg></span><span class="side-label">Disputes</span></a>
+        <a href="{% url 'portal:channels' %}" class="{% if active_nav == 'channels' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v9M12 12a3 3 0 1 0 0 6 3 3 0 0 0 0-6M5 8a4 4 0 0 1 0-4M19 8a4 4 0 0 0 0-4M4 20h16"/></svg></span><span class="side-label">Channels</span></a>
+        <a href="{% url 'portal:directory' %}" class="{% if active_nav == 'directory' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20v-1.5A3.5 3.5 0 0 1 6.5 15h4a3.5 3.5 0 0 1 3.5 3.5V20M8.5 5.5a3 3 0 1 1 0 6 3 3 0 0 1 0-6M17 20v-1.5a3.5 3.5 0 0 0-2-3.2M15 5.7a3 3 0 0 1 0 5.6"/></svg></span><span class="side-label">Agent Directory</span></a>
+        <a href="{% url 'portal:reports' %}" class="{% if active_nav == 'reports' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h9l5 5v13H5zM14 3v5h5M9 13h6M9 17h4"/></svg></span><span class="side-label">Reports</span></a>
+        <a href="{% url 'portal:settings' %}" class="{% if active_nav == 'settings' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg></span><span class="side-label">Settings</span></a>
+        <a href="{% url 'portal:products' %}" class="{% if active_nav == 'products' %}on{% endif %}">
+          <span class="side-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3.5 7.5v9L12 21l8.5-4.5v-9zM3.5 7.5 12 12l8.5-4.5M12 12v9"/></svg></span><span class="side-label">Products</span></a>
+      {% endif %}
+    </nav>
+
+    {% if agent.is_agent %}
+      <div class="side-xp">
+        <div class="side-xp-row">
+          <span class="lvl-dot">{{ agent.level }}</span>
+          <span class="side-xp-text">
+            <b>{{ agent.rank_title }}</b>
+            <span>{{ agent.xp_into_level }}/{{ agent.xp_for_next_level }} XP</span>
+          </span>
+        </div>
+        <span class="xp-mini-track"><span style="width:{{ agent.level_pct }}%"></span></span>
+        {% if agent.streak_days %}
+          <div class="side-streak"><span class="flame">&#128293;</span> {{ agent.streak_days }}-day streak</div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <button class="side-collapse" id="sideCollapse" type="button" aria-label="Collapse sidebar">&#8249;</button>
+  </aside>
+
+  <!-- ================= Content ================= -->
+  <main class="content">
+    <div class="content-inner">
+      {% if not agent %}
+        <div class="alert info">This account has no agent profile attached.
+          Attach one in <a href="{% url 'admin:index' %}">the admin</a>.</div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+
+<!-- Command palette -->
+<div class="palette-backdrop" id="palette" hidden style="display:none">
+  <div class="palette" role="dialog" aria-modal="true" aria-label="Command palette">
+    <input type="text" id="paletteInput" placeholder="Search pages and incentives&hellip;"
+           autocomplete="off" aria-label="Search pages and incentives">
+    <ul class="palette-list" id="paletteList"></ul>
+    <div class="palette-foot">
+      <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate</span>
+      <span><kbd>&crarr;</kbd> open</span>
+      <span><kbd>Esc</kbd> close</span>
+    </div>
+  </div>
+</div>
+
+<div class="levelup" id="levelup" hidden style="display:none" role="dialog" aria-modal="true">
+  <div class="levelup-card">
+    <div class="levelup-badge">?</div>
+    <h2>Level up!</h2>
+    <p>{{ agent.rank_title }} &middot; keep the streak going</p>
+    <button class="btn btn-primary btn-block" data-close-levelup>Nice</button>
+  </div>
+</div>
+
+<!-- Floating assistant -->
+<button class="ask-fab" id="askFab" type="button" aria-label="Open Spidey, the portal assistant">
+  {% include "portal/_character.html" with mood=assistant_mood size="sm" %}
+  <span class="ask-fab-label">Ask</span>
+</button>
+
+<div class="ask-panel" id="askPanel" hidden style="display:none" role="dialog"
+     aria-modal="false" aria-label="Spidey, the portal assistant">
+  <header class="ask-head">
+    {% include "portal/_character.html" with mood=assistant_mood size="md" %}
+    <div>
+      <b>Spidey</b>
+      <span class="small muted">Your portal assistant</span>
+    </div>
+    <div class="ask-head-btns">
+      <button type="button" class="linkish" id="askClear">Clear</button>
+      <button type="button" class="ask-close" id="askClose" aria-label="Close">&times;</button>
+    </div>
+  </header>
+
+  <div class="ask-log" id="askLog">
+    {% for turn in ask_history %}
+      <div class="bubble you">{{ turn.q }}</div>
+      <div class="bubble bot">{{ turn.a }}
+        <span class="engine-tag {{ turn.engine }}">{% if turn.engine == "claude" %}Claude{% else %}portal data{% endif %}</span>
+        {% if turn.links %}<div class="bubble-links">
+          {% for l in turn.links %}<a href="{{ l.url }}">{{ l.label }} &rsaquo;</a>{% endfor %}
+        </div>{% endif %}
+      </div>
+    {% empty %}
+      <div class="ask-empty">
+        <div class="chat-ic">&#128172;</div>
+        <p class="small muted">I am Spidey. Ask about your {% if agent.is_agent %}earnings, rank or what to sell{% else %}teams, trends or plans{% endif %}.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="ask-suggest" id="askSuggest">
+    {% for s in ask_suggestions %}<button type="button" class="ask-chip">{{ s }}</button>{% endfor %}
+  </div>
+
+  <form class="ask-form" id="askForm">
+    <input type="text" id="askInput" autocomplete="off" maxlength="300"
+           placeholder="Ask a question&hellip;" aria-label="Ask Spidey a question">
+    <button class="btn btn-primary btn-sm" type="submit">Ask</button>
+  </form>
+</div>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script id="paletteData" type="application/json">{{ palette_json|safe }}</script>
+<script src="{% static_v 'js/filters.js' %}"></script>
+<script src="{% static_v 'js/portal.js' %}"></script>
+<script src="{% static_v 'js/anim.js' %}"></script>
+<script src="{% static_v 'js/assistant.js' %}"></script>
+<script src="{% static_v 'js/interact.js' %}"></script>
+</body>
+</html>

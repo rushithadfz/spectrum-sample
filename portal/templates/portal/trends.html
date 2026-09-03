@@ -1,0 +1,95 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+{% block title %}Buying Trends &middot; Spectrum Incentive Portal{% endblock %}
+{% block content %}
+
+<div class="page-head-row">
+  <div>
+    <h1 class="page-h1">Buying Trends</h1>
+    <p class="muted mb0">What customers in your area are actually buying this period</p>
+  </div>
+  {% if regions|length > 1 %}
+  <form method="get" class="inline-form">
+    <select name="region" data-autofilter>
+      {% for r in regions %}<option {% if r == region %}selected{% endif %}>{{ r }}</option>{% endfor %}
+    </select>
+  </form>
+  {% endif %}
+</div>
+
+<div class="kpi-row" data-reveal>
+  {% include "portal/_kpi.html" with label="Units sold" value=total_units icon="&#128230;" tone="blue" sub=region %}
+  {% for r in rising|slice:":2" %}
+    {% include "portal/_kpi.html" with label="Rising" value=r.product wide=1 icon="&#128200;" tone="green" delta=r.change_pct suffix_delta="%" delta_dir="up" insight="Attach rate still has room to push" %}
+  {% endfor %}
+  {% for r in falling|slice:":2" %}
+    {% include "portal/_kpi.html" with label="Falling" value=r.product wide=1 icon="&#128201;" tone="red" delta=r.change_pct suffix_delta="%" delta_dir="down" sub="losing ground this period" %}
+  {% endfor %}
+</div>
+
+<div class="split">
+  <div class="stack">
+    <section class="card" data-reveal>
+      <div class="card-head"><h2><span class="head-ic">&#128202;</span> What is selling</h2><span class="small muted">{{ region }}</span></div>
+      <div class="table-wrap">
+        <table class="tbl" data-sortable>
+          <thead><tr><th>Product</th><th>Category</th><th class="num">Units</th>
+                     <th class="num">Change</th><th class="num">Attach</th><th data-nosort></th></tr></thead>
+          <tbody>
+            {% for r in rows %}
+              <tr>
+                <td>
+                  <b>{{ r.product }}</b>
+                  <div class="trend-bar"><span style="width:{{ r.bar_pct }}%"></span></div>
+                </td>
+                <td><span class="tag">{{ r.category }}</span></td>
+                <td class="num">{{ r.units }}</td>
+                <td class="num">
+                  <span class="diff-pill {% if r.change_pct < 0 %}down{% else %}up{% endif %}">
+                    {% if r.change_pct < 0 %}&darr;{% else %}&uarr;{% endif %} {{ r.change_pct }}%
+                  </span>
+                </td>
+                <td class="num">{{ r.attach_rate }}%</td>
+                <td class="right">
+                  <a class="btn btn-ghost btn-sm" href="{% url 'portal:plan_new' %}?trend={{ r.pk }}">Build incentive</a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="empty">No trend data for {{ region }}.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="card" data-reveal>
+      <div class="card-head"><h3><span class="head-ic amber">&#128161;</span> Opportunities</h3></div>
+      <div class="card-pad">
+        <p class="small muted" style="margin-top:-4px">Selling well but under-attached &mdash; the gap an incentive can close.</p>
+        {% for r in opportunities %}
+          <div class="opp">
+            <div>
+              <b>{{ r.product }}</b>
+              <div class="small muted">{{ r.change_pct }}% growth &middot; only {{ r.attach_rate }}% attach</div>
+            </div>
+            <a class="btn btn-primary btn-sm" href="{% url 'portal:plan_new' %}?trend={{ r.pk }}">Build</a>
+          </div>
+        {% empty %}
+          <p class="small muted mb0">No obvious gaps this period.</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="card card-pad" data-reveal>
+      <h3><span class="head-ic teal">&#9636;</span> Category mix</h3>
+      {% for m in mix %}
+        <div class="bar-row"><span class="lbl">{{ m.category }}</span><span class="val">{{ m.units }} &middot; {{ m.pct }}%</span></div>
+        <div class="bar"><span style="width:{{ m.pct }}%"></span></div>
+      {% endfor %}
+    </section>
+  </div>
+</div>
+
+{% endblock %}

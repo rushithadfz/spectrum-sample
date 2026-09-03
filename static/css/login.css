@@ -1,0 +1,337 @@
+/* ============================================================
+   Gamified sign-in screen.
+   Loaded only by registration/login.html, on top of app.css.
+   ============================================================ */
+
+:root {
+  --xp:        #ffc53d;
+  --xp-glow:   rgba(255, 197, 61, .45);
+  --flame:     #ff7a3d;
+  --neon:      #35d0ff;
+  --neon-soft: rgba(53, 208, 255, .18);
+}
+
+/* The hero column is tall; the page must be allowed to scroll rather than
+   clip it. Only the decorative canvas is pinned to the viewport. */
+.login-page { overflow-x: hidden; }
+
+/* ---------- Animated backdrop ---------- */
+#grid-canvas {
+  position: fixed; inset: 0; width: 100%; height: 100%;
+  z-index: 0; pointer-events: none; opacity: .55;
+}
+
+.login-wrap { position: relative; z-index: 1; min-height: 100vh; }
+
+.login-art {
+  position: relative;
+  background:
+    radial-gradient(900px 560px at 10% -8%, rgba(255,255,255,.055), transparent 62%),
+    radial-gradient(720px 500px at 96% 108%, rgba(163,0,95,.16), transparent 60%),
+    linear-gradient(165deg, #1e232a, #16191d 70%);
+}
+
+/* ---------- Rank card ---------- */
+.rank-card {
+  position: relative;
+  border: 1px solid rgba(127,196,242,.28);
+  border-radius: 18px;
+  padding: 22px 24px 20px;
+  background: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.02));
+  backdrop-filter: blur(6px);
+  max-width: 420px;
+  overflow: hidden;
+}
+/* slow sheen sweeping across the card */
+.rank-card::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.10), transparent);
+  animation: sheen 7s ease-in-out infinite;
+}
+@keyframes sheen {
+  0%, 100% { transform: translateX(-160%); }
+  55%      { transform: translateX(320%); }
+}
+
+.rank-eyebrow {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; font-weight: 800; letter-spacing: .18em;
+  text-transform: uppercase; color: #7fc4f2; margin-bottom: 14px;
+}
+.rank-eyebrow .dot {
+  width: 7px; height: 7px; border-radius: 50%; background: #35ff9b;
+  box-shadow: 0 0 0 0 rgba(53,255,155,.7); animation: pulse 2.2s infinite;
+}
+@keyframes pulse {
+  70%  { box-shadow: 0 0 0 9px rgba(53,255,155,0); }
+  100% { box-shadow: 0 0 0 0 rgba(53,255,155,0); }
+}
+
+.rank-row { display: flex; align-items: center; gap: 16px; }
+
+.level-badge {
+  position: relative; width: 76px; height: 76px; flex: none;
+  display: grid; place-items: center;
+}
+.level-badge svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.level-badge .ring-bg   { stroke: rgba(255,255,255,.13); }
+.level-badge .ring-fill {
+  stroke: var(--xp); stroke-linecap: round;
+  filter: drop-shadow(0 0 6px var(--xp-glow));
+  transition: stroke-dashoffset 1.6s cubic-bezier(.16,.8,.3,1);
+}
+.level-badge .lvl { position: relative; text-align: center; line-height: 1; }
+.level-badge .lvl b { display: block; font-size: 25px; font-weight: 800; color: #fff; }
+.level-badge .lvl span { font-size: 9px; letter-spacing: .16em; color: #8fb6d4; font-weight: 700; }
+
+.rank-title { font-size: 21px; font-weight: 800; color: #fff; margin: 0 0 2px; }
+.rank-sub   { font-size: 12.5px; color: #8fb6d4; margin: 0; }
+
+.xp-track {
+  margin-top: 14px; height: 8px; border-radius: 999px;
+  background: rgba(255,255,255,.12); overflow: hidden;
+}
+.xp-track > span {
+  display: block; height: 100%; width: 0; border-radius: 999px;
+  background: linear-gradient(90deg, #0f7440, #12897f, #0073d1);
+  box-shadow: 0 0 12px var(--xp-glow);
+  transition: width 1.6s cubic-bezier(.16,.8,.3,1);
+}
+.xp-legend {
+  display: flex; justify-content: space-between;
+  font-size: 11.5px; color: #8fb6d4; margin-top: 7px; font-variant-numeric: tabular-nums;
+}
+.xp-legend b { color: var(--xp); }
+
+/* ---------- Streak / stat chips ---------- */
+.chip-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.gchip {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 13px; border-radius: 999px;
+  border: 1px solid rgba(127,196,242,.25); background: rgba(255,255,255,.05);
+  font-size: 12.5px; color: #cfe1f0; font-weight: 600;
+}
+.gchip b { color: #fff; }
+.gchip .flame { animation: flicker 1.6s ease-in-out infinite; }
+@keyframes flicker {
+  0%, 100% { transform: scale(1)    rotate(-2deg); opacity: 1;  }
+  50%      { transform: scale(1.16) rotate(3deg);  opacity: .85; }
+}
+
+/* ---------- Live portal stats ---------- */
+.marks { display: flex; gap: 30px; margin-top: 30px; flex-wrap: wrap; }
+.marks div { font-size: 12.5px; color: #8fb6d4; }
+.marks b {
+  display: block; font-size: 27px; color: #fff; font-weight: 800;
+  letter-spacing: -.02em; font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Rotating objective ticker ---------- */
+.objective {
+  margin-top: 26px; border-left: 3px solid var(--neon);
+  padding: 10px 0 10px 15px; max-width: 430px; min-height: 54px;
+}
+.objective .obj-label {
+  font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--neon); font-weight: 800; margin-bottom: 4px;
+}
+.objective .obj-text { font-size: 14px; color: #dceaf6; margin: 0; }
+.objective.swap .obj-text { animation: swapIn .45s ease both; }
+@keyframes swapIn {
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- Form side ---------- */
+.login-panel { position: relative; z-index: 1; }
+
+.field { position: relative; }
+.field input { transition: border-color .18s, box-shadow .18s; padding-right: 78px; }
+.field.ok input    { border-color: #3fbf78; box-shadow: 0 0 0 3px rgba(63,191,120,.14); }
+.field.warn input  { border-color: #e0a23a; box-shadow: 0 0 0 3px rgba(224,162,58,.14); }
+
+/* the tick that appears once a field is filled */
+.field .tick {
+  position: absolute; right: 14px; top: 37px;
+  width: 21px; height: 21px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: #3fbf78; color: #fff; font-size: 12px; font-weight: 800;
+  opacity: 0; transform: scale(.4); transition: .22s cubic-bezier(.3,1.5,.5,1);
+}
+.field.ok .tick { opacity: 1; transform: scale(1); }
+
+/* show/hide password */
+.peek {
+  position: absolute; right: 42px; top: 36px;
+  background: none; border: 0; cursor: pointer; padding: 2px 4px;
+  font-size: 15px; line-height: 1; opacity: .55;
+}
+.peek:hover { opacity: 1; }
+
+.caps-hint {
+  display: none; margin-top: 6px; font-size: 12px;
+  color: var(--amber); font-weight: 600;
+}
+.caps-hint.on { display: block; }
+
+/* readiness meter above the button */
+.ready-row {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; color: var(--muted); margin: 4px 0 14px;
+}
+.ready-bar { flex: 1; height: 5px; border-radius: 999px; background: #e9eef4; overflow: hidden; }
+.ready-bar > span {
+  display: block; height: 100%; width: 0%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--blue), #35d0ff);
+  transition: width .3s ease;
+}
+
+/* ---------- Unlock button ---------- */
+.unlock {
+  position: relative; overflow: hidden;
+  background: #16191d;
+  letter-spacing: .04em; font-weight: 700;
+}
+.unlock:disabled { opacity: .5; cursor: not-allowed; }
+.unlock .fill {
+  position: absolute; inset: 0; width: 0;
+  background: rgba(255,255,255,.24); transition: width .75s linear;
+}
+.unlock .label { position: relative; display: flex; align-items: center; gap: 9px; }
+.unlock.charging .fill { width: 100%; }
+.unlock.charging { pointer-events: none; }
+
+.shake { animation: shake .4s; }
+@keyframes shake {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-7px); }
+  40%, 60% { transform: translateX(7px); }
+}
+
+/* ---------- Arrival overlay (dashboard, once per sign-in) ---------- */
+.arrival {
+  position: fixed; inset: 0; z-index: 90;
+  display: grid; place-items: center;
+  background: rgba(0, 20, 40, .78); backdrop-filter: blur(7px);
+  animation: fadeIn .3s ease both;
+}
+.arrival.out { animation: fadeOut .45s ease both; }
+@keyframes fadeIn  { from { opacity: 0 } to { opacity: 1 } }
+@keyframes fadeOut { from { opacity: 1 } to { opacity: 0; visibility: hidden } }
+
+.arrival-card {
+  background: linear-gradient(165deg, #073a68, #002744);
+  border: 1px solid rgba(127,196,242,.3);
+  border-radius: 20px; padding: 34px 40px; text-align: center;
+  max-width: 400px; color: #fff; box-shadow: 0 30px 80px rgba(0,0,0,.5);
+  animation: popIn .5s cubic-bezier(.2,1.3,.4,1) both;
+}
+@keyframes popIn {
+  from { opacity: 0; transform: scale(.86) translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+.arrival-card .big-flame { font-size: 46px; display: block; margin-bottom: 6px; }
+.arrival-card h2 { font-size: 25px; margin: 0 0 6px; }
+.arrival-card p  { color: #b9d6ee; font-size: 14px; margin: 0 0 20px; }
+.arrival-xp {
+  display: inline-flex; align-items: baseline; gap: 7px;
+  font-size: 31px; font-weight: 800; color: var(--xp);
+  text-shadow: 0 0 22px var(--xp-glow); margin-bottom: 18px;
+}
+.arrival-xp span { font-size: 13px; color: #8fb6d4; font-weight: 600; }
+.arrival-stats {
+  display: flex; gap: 22px; justify-content: center;
+  border-top: 1px solid rgba(255,255,255,.14); padding-top: 16px; margin-bottom: 20px;
+}
+.arrival-stats div { font-size: 11.5px; color: #8fb6d4; }
+.arrival-stats b { display: block; font-size: 19px; color: #fff; }
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .rank-card::after, .gchip .flame, .rank-eyebrow .dot { animation: none; }
+  .xp-track > span, .level-badge .ring-fill { transition: none; }
+  #grid-canvas { display: none; }
+  .arrival-card { animation: none; }
+}
+
+@media (max-width: 860px) {
+  .rank-card { max-width: none; }
+  .marks { gap: 20px; }
+}
+
+/* ============================================================
+   Role picker (POC sign-in, no credentials)
+   ============================================================ */
+.role-card { max-width: 440px; }
+
+.persona-list { list-style: none; padding: 0; margin: 0 0 20px; }
+.persona-list li + li { margin-top: 10px; }
+
+.persona {
+  width: 100%; display: flex; align-items: flex-start; gap: 13px; text-align: left;
+  padding: 14px 15px; border-radius: 13px; border: 1px solid var(--line);
+  background: var(--white); font: inherit; cursor: pointer;
+  transition: border-color .15s, box-shadow .15s, transform .06s, background .15s;
+}
+.persona:hover { border-color: #9cc9ec; background: #fbfdff; }
+.persona:active { transform: translateY(1px); }
+.persona:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+.persona.on {
+  border-color: var(--blue); background: var(--sky);
+  box-shadow: 0 0 0 3px rgba(0,115,209,.14);
+}
+
+.persona.locked { opacity: .55; cursor: not-allowed; }
+.persona.locked:hover { border-color: var(--line); background: var(--white); }
+
+.persona-avatar {
+  width: 42px; height: 42px; border-radius: 50%; flex: none;
+  display: grid; place-items: center;
+  font-weight: 800; font-size: 14px; color: #fff; background: var(--blue);
+}
+.accent-blue   { background: #0073d1; }
+.accent-violet { background: #5d3fa8; }
+.accent-teal   { background: #00707d; }
+.accent-amber  { background: #8f5600; }
+.accent-magenta{ background: #a3005f; }
+.accent-green  { background: #0f7440; }
+
+.persona-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.persona-name  { font-weight: 700; font-size: 14.5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.persona-title { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.persona-blurb { font-size: 12px; color: var(--muted); }
+
+.persona-tick {
+  margin-left: auto; align-self: center; flex: none;
+  width: 22px; height: 22px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 12px; font-weight: 800;
+  background: var(--blue); color: #fff;
+  opacity: 0; transform: scale(.4); transition: .2s cubic-bezier(.3,1.5,.5,1);
+}
+.persona.on .persona-tick { opacity: 1; transform: scale(1); }
+
+@media (max-width: 860px) {
+  .role-card { max-width: none; }
+}
+
+/* ---------- Grouped persona picker ---------- */
+.persona-scroll { max-height: 46vh; overflow-y: auto; padding-right: 6px; margin-bottom: 18px; }
+.persona-scroll::-webkit-scrollbar { width: 8px; }
+.persona-scroll::-webkit-scrollbar-thumb { background: #d8e2ea; border-radius: 999px; }
+.persona-group {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); font-weight: 800; margin: 14px 0 8px;
+}
+.persona-group:first-child { margin-top: 0; }
+.persona-group span {
+  background: #e4e8ee; color: #3b434e; border-radius: 999px; padding: 1px 8px;
+  font-size: 10px; letter-spacing: 0;
+}
+.persona-list li + li { margin-top: 8px; }
+.persona { padding: 11px 13px; }
+.persona-avatar { width: 36px; height: 36px; font-size: 12.5px; }
+.persona-name { font-size: 13.5px; }
+.persona-title { font-size: 11.5px; }

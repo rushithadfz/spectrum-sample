@@ -1,0 +1,124 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}Home &middot; Team Lead{% endblock %}
+
+{% block content %}
+
+<section class="greet">
+  <div>
+    <p class="greet-small">{{ greeting }},</p>
+    <h1 class="greet-name">{{ agent.full_name }}</h1>
+  </div>
+  <div class="greet-meta">
+    <span><b>Team:</b> {{ team.name|default:"unassigned" }}</span>
+    <span><b>Region:</b> {{ team.region }}</span>
+    <span class="sep">|</span>
+    <span><b>Manager:</b> {{ agent.manager }}</span>
+  </div>
+</section>
+
+<div class="kpi-row" data-reveal>
+  {% include "portal/_kpi.html" with label="Team attainment" value=team.attainment suffix="%" icon="&#127919;" tone="blue" insight="Mean across the squad this period" %}
+  {% include "portal/_kpi.html" with label="At or above quota" value=on_track icon="&#9989;" tone="green" sub="of the whole squad" %}
+  {% include "portal/_kpi.html" with label="Needs coaching" value=needs_help|length icon="&#9888;" tone="amber" sub="below 70% attainment" %}
+  {% include "portal/_kpi.html" with label="Team points" value=team_points icon="&#9889;" tone="violet" sub="earned this period" %}
+  {% include "portal/_kpi.html" with label="Open disputes" value=open_disputes icon="&#9878;" tone="red" sub="on your squad" %}
+</div>
+
+{% if insights %}
+<section class="card" data-reveal style="margin-bottom:18px">
+  <div class="card-head">
+    <h2><span class="head-ic violet">&#10022;</span> Insights</h2>
+    <span class="small muted">Derived from this period&rsquo;s figures</span>
+  </div>
+  <div class="insight-list">
+    {% for tone, line in insights %}
+      <div class="insight {{ tone }}"><span class="dot"></span><span>{{ line }}</span></div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<div class="split" data-reveal>
+  <div class="stack">
+
+    <section class="card">
+      <div class="card-head">
+        <h2><span class="head-ic">&#128101;</span> Squad standings</h2>
+        <a class="more" href="{% url 'portal:team' %}">Full roster</a>
+      </div>
+      <div class="table-wrap">
+        <table class="tbl" data-sortable>
+          <thead><tr><th>Agent</th><th class="num">Attainment</th><th class="num">Points</th><th>Tier</th></tr></thead>
+          <tbody>
+            {% for r in rows %}
+              <tr>
+                <td>
+                  <div class="person">
+                    <span class="avatar sm">{{ r.agent.initials }}</span>
+                    <b>{{ r.agent.full_name }}</b>
+                  </div>
+                </td>
+                <td class="num" data-sort="{{ r.attainment }}">
+                  <div class="mini-bar-wrap">
+                    <span class="mini-num">{{ r.attainment }}%</span>
+                    <span class="bar {{ r.attainment_class }}"><span style="width:{{ r.attainment }}%"></span></span>
+                  </div>
+                </td>
+                <td class="num">{{ r.points }}</td>
+                <td><span class="badge">{{ r.tier }}</span></td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4" class="empty">No agents on this team.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    {% if needs_help %}
+    <section class="card">
+      <div class="card-head"><h2><span class="head-ic amber">&#9888;</span> Coaching list</h2><span class="small muted">Below 70% attainment</span></div>
+      <ul class="linklist">
+        {% for r in needs_help %}
+          <li><a href="{% url 'portal:team' %}">
+            <span class="ic">&#9888;</span>{{ r.agent.full_name }}
+            <span class="meta">{{ r.attainment }}% &middot; {{ r.points }} pts</span>
+          </a></li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+  </div>
+
+  <div class="stack">
+    {% if top %}
+    <section class="card card-pad house">
+      <h2>Top of the squad</h2>
+      <p class="small muted">Leading this period</p>
+      <div class="person" style="margin:14px 0">
+        <span class="avatar">{{ top.agent.initials }}</span>
+        <span><b style="font-size:15px">{{ top.agent.full_name }}</b><br>
+          <span class="small" style="color:#8fb6d4">{{ top.attainment }}% &middot; {{ top.points }} pts</span></span>
+      </div>
+      <a class="btn btn-primary btn-block" href="{% url 'portal:team' %}">Open roster</a>
+    </section>
+    {% endif %}
+
+    <section class="card">
+      <div class="card-head"><h3><span class="head-ic">&#127919;</span> Live programmes</h3></div>
+      <ul class="linklist">
+        {% for i in active_incentives %}
+          <li><a href="{% url 'portal:incentive_detail_code' i.short_code %}">
+            <span class="ic">&#127919;</span>{{ i.name }}
+            <span class="meta">{{ i.short_code }}</span>
+          </a></li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+</div>
+
+{% endblock %}

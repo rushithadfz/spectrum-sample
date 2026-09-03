@@ -1,0 +1,207 @@
+{% extends "portal/base.html" %}
+{% load portal_extras %}
+
+{% block title %}{{ incentive.name }} &middot; Spectrum Incentive Portal{% endblock %}
+
+{% block content %}
+
+{% if scorecard %}
+<div class="page-head-row">
+  <div>
+    <h1 class="page-h1">{{ incentive.name|default:"Points Incentive" }}</h1>
+    <p class="muted mb0">Track your progress and performance</p>
+  </div>
+  <div class="ranking-pill">
+    <span class="rk-label">Ranking</span>
+    <b>{{ incentive.name|default:"Points Incentive" }}</b>
+  </div>
+</div>
+
+<!-- ---------- Identity strip ---------- -->
+<div class="card idstrip" data-reveal>
+  <div><span class="idlabel">PSID</span><b>{{ scorecard.psid }}</b><span class="small muted">Employee</span></div>
+  <div><span class="idlabel">Job Code</span><b>{{ scorecard.job_code }}</b></div>
+  <div><span class="idlabel">Location</span><b>{{ scorecard.location }}</b></div>
+  <div><span class="idlabel">Incentive ID</span><b>{{ scorecard.incentive_id }}</b></div>
+  <div class="idstrip-end"><a class="linkish" href="#how">How does this work?</a></div>
+</div>
+
+<div class="split" style="margin-top:18px">
+  <div class="stack">
+
+    <!-- ---------- Rank ---------- -->
+    <div class="rank-panel card" data-reveal>
+      <div class="rank-block">
+        <div class="rank-label">Your Rank</div>
+        <div class="rank-big">{{ scorecard.rank }} <span>/ {{ scorecard.rank_of }}</span></div>
+        <div class="small muted">
+          Total Points: <b>{{ scorecard.total_points }}</b>
+          {% if scorecard.rank_delta %}
+            <span class="rank-move {{ scorecard.rank_direction }}">
+              <span class="arrow">{% if scorecard.rank_direction == 'up' %}&#9650;{% else %}&#9660;{% endif %}</span>
+              {{ scorecard.rank_delta|stringformat:"+d" }} since last period
+            </span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="rank-block">
+        <div class="rank-label">{{ scorecard.current_tier.name }} Tier</div>
+        <div class="rank-big money">{{ scorecard.potential_payout|money }}</div>
+        <div class="small muted">Potential Payout</div>
+      </div>
+      <div class="rank-block">
+        <div class="rank-label">Standing</div>
+        <div class="rank-big">Top {{ scorecard.top_pct }}%</div>
+        <div class="small muted">of all reps</div>
+      </div>
+    </div>
+
+    <!-- ---------- Tier ladder ---------- -->
+    <div class="card">
+      <div class="card-head"><h2>Tier Progress</h2></div>
+      <div class="ladder">
+        {% for t in tiers %}
+          <div class="rung {% if t.is_current %}current{% endif %} {% if t.reached %}reached{% endif %}">
+            {% if t.is_current %}<span class="rung-flag">CURRENT</span>{% endif %}
+            <div class="rung-name">{{ t.name }}</div>
+            <div class="rung-gap">{{ t.next_label|default:"&mdash;" }}</div>
+            <div class="rung-pay">{{ t.payout|money0 }}</div>
+          </div>
+          {% if not forloop.last %}<span class="rung-arrow">&rarr;</span>{% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- ---------- Performance ---------- -->
+    <div class="card" data-reveal>
+      <div class="card-head">
+        <h2>&#128200; Performance &amp; Opportunities</h2>
+        {% if focus %}<span class="small">Focus on <b>{{ focus.label }}</b> for best improvement</span>{% endif %}
+      </div>
+      <div class="table-wrap">
+        <table class="tbl perf-table">
+          <thead>
+            <tr>
+              <th></th>
+              {% for m in mtd %}<th class="num {% if m.is_focus %}focus-col{% endif %}">{{ m.label }}</th>{% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Your MTD Volume</td>
+              {% for m in mtd %}<td class="num">{{ m.volume }}</td>{% endfor %}
+            </tr>
+            <tr>
+              <td>Your MTD Points</td>
+              {% for m in mtd %}<td class="num accent">{{ m.points }}</td>{% endfor %}
+            </tr>
+            <tr>
+              <td>Your % of Points</td>
+              {% for m in mtd %}<td class="num">{{ m.pct_of_points }}%</td>{% endfor %}
+            </tr>
+            <tr>
+              <td>Star % of Points</td>
+              {% for m in mtd %}<td class="num">{{ m.star_pct }}%</td>{% endfor %}
+            </tr>
+            <tr class="diff-row">
+              <td><b>Difference</b></td>
+              {% for m in mtd %}
+                <td class="num">
+                  <span class="diff-pill {{ m.difference_class }}">
+                    {% if m.difference < 0 %}&darr;{% else %}&uarr;{% endif %} {{ m.difference }}%
+                  </span>
+                </td>
+              {% endfor %}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ---------- Level-Up Mentor + Streak ---------- -->
+    <div class="mentor-row" data-reveal>
+      {% if mentor %}
+      <div class="card">
+        <div class="card-head">
+          <h2>&#128161; Level-Up Mentor</h2>
+          <span class="tag">Path to {{ mentor.tier.name }}</span>
+        </div>
+        <div class="card-pad">
+          <div class="mentor-figures">
+            <div class="mentor-fig">
+              <div class="cap">Points to {{ mentor.tier.name }}</div>
+              <div class="val accent">{{ mentor.points_to_go }}</div>
+            </div>
+            <div class="mentor-fig warm">
+              <div class="cap">Days remaining</div>
+              <div class="val">{{ mentor.days }}</div>
+            </div>
+          </div>
+          <p class="small muted" style="margin:14px 0 8px">
+            <b>Daily recommendations</b> &mdash; {{ mentor.per_day }} pts/day gets you there
+          </p>
+          <div class="rec-row">
+            {% for r in mentor.recommendations %}
+              <div class="rec"><div class="rec-label">{{ r.label }}</div><div class="rec-val">{{ r.units }}</div></div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="card streak-card">
+        <div class="card-head"><h2>&#128293; Your Streak</h2></div>
+        <div class="card-pad" style="text-align:center">
+          <div class="streak-num">{{ scorecard.point_streak }}</div>
+          <div class="small muted">Day Point Streak!</div>
+          <div class="small muted" style="margin:14px 0 7px;text-align:left">
+            {{ scorecard.point_streak }}/{{ scorecard.period_days }} days completed
+          </div>
+          <div class="streak-track"><span style="width:{{ scorecard.streak_pct }}%"></span></div>
+          <div class="streak-dots">
+            {% for lit in scorecard.streak_dots %}
+              <span class="dot {% if lit %}lit{% endif %}"></span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="stack">
+    <!-- ---------- Points structure ---------- -->
+    <div class="card">
+      <div class="card-head"><h3>Points Structure</h3></div>
+      <ul class="spec-mini" style="padding:14px 20px;margin:0">
+        {% for r in points_rules %}
+          <li><span>{{ r.label }}</span><span>{{ r.points }} pts</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="card card-pad" id="how">
+      <h3>Key dates</h3>
+      <ul class="spec-mini" style="margin-bottom:0">
+        <li><span>Status</span><span class="ok-text">{{ scorecard.eligibility }}</span></li>
+        <li><span>Report Date</span><span>{{ scorecard.report_date|date:"Y-m-d" }}</span></li>
+        <li><span>Finalization</span><span>{{ scorecard.finalization_date|date:"Y-m-d" }}</span></li>
+        <li><span>Pay Date</span><span>{{ scorecard.pay_date|date:"Y-m-d" }}</span></li>
+      </ul>
+    </div>
+
+    <div class="card card-pad">
+      <h3>How does this work?</h3>
+      <p class="small muted mb0">
+        Every product sold earns points at the rate in the points structure. Your points
+        put you on a tier, and the tier decides the payout. Points are finalised on the
+        finalization date and paid on the pay date.
+      </p>
+    </div>
+  </div>
+</div>
+{% else %}
+  <div class="card empty">No scorecard for this agent yet.</div>
+{% endif %}
+
+{% endblock %}
