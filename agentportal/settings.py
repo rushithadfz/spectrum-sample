@@ -67,6 +67,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'agentportal.urls'
 
+# Django's default CSRF page is a bare yellow 403. The usual cause here is a
+# tab left open while the free host slept, so the page should say so and offer
+# the one click that fixes it.
+CSRF_FAILURE_VIEW = 'portal.views_errors.csrf_failure'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

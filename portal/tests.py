@@ -2614,3 +2614,58 @@ class TemplateCommentTests(TestCase):
                 if "{#" in line and "#}" not in line[line.index("{#"):]:
                     offenders.append(f"{path.name}:{n}")
         self.assertEqual(offenders, [], "use {% comment %} for anything multi-line")
+
+
+class CsrfFailurePageTests(TestCase):
+    """
+    The demo sleeps on its free host, so a stale tab hitting a CSRF failure is
+    an expected event, not an edge case. It must read as "reload me", never as
+    "this application is broken".
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_demo", verbosity=0)
+
+    def test_a_missing_csrf_cookie_gets_the_explaining_page(self):
+        from django.test import Client
+
+        client = Client(enforce_csrf_checks=True)
+        resp = client.post(reverse("login"), {"persona": "jliu"})
+
+        self.assertEqual(resp.status_code, 403)
+        body = resp.content.decode()
+        self.assertIn("sitting a while", body)
+        self.assertIn("Back to sign in", body)
+        self.assertNotIn("CSRF verification failed", body)
+
+    def test_the_page_offers_a_working_way_back(self):
+        from django.test import Client
+
+        client = Client(enforce_csrf_checks=True)
+        body = client.post(reverse("login"), {"persona": "jliu"}).content.decode()
+        self.assertIn(f'href="{reverse("login")}"', body)
+        # and that link must actually render
+        self.assertEqual(self.client.get(reverse("login")).status_code, 200)
+
+    def test_it_is_wired_up_so_django_never_shows_its_own_page(self):
+        from django.conf import settings
+
+        self.assertEqual(settings.CSRF_FAILURE_VIEW,
+                         "portal.views_errors.csrf_failure")
+
+    def test_django_internals_are_not_shown_to_the_visitor(self):
+        """
+        Django's reason names the failing check and the trusted origins. That
+        is diagnostic detail about the security configuration - it belongs in
+        the log, not on a public page.
+        """
+        from django.test import Client
+
+        body = Client(enforce_csrf_checks=True).post(
+            reverse("login"), {"persona": "jliu"}
+        ).content.decode()
+        for internal in ("Origin checking failed", "trusted origins",
+                         "CSRF cookie", "Referer"):
+            with self.subTest(leak=internal):
+                self.assertNotIn(internal, body)
