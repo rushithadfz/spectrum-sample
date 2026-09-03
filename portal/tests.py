@@ -44,6 +44,20 @@ class PortalTests(TestCase):
         call_command("seed_demo", verbosity=0)
         cls.user = User.objects.get(username="jliu")
 
+    def assertLinked(self, body, asset):
+        """
+        Assert a static file is linked, whatever its served filename.
+
+        With DEBUG off, ManifestStaticFilesStorage rewrites "css/anim.css" to
+        "css/anim.776ec14524c0.css" for cache-busting, so matching the literal
+        name only passes in development.
+        """
+        import re as _re
+
+        stem, dot, ext = asset.rpartition(".")
+        pattern = _re.escape(stem) + r"(\.[0-9a-f]{8,})?" + _re.escape(dot + ext)
+        self.assertRegex(body, pattern, f"{asset} should be linked")
+
     def login(self, persona="jliu"):
         """
         Sign in through the real role picker.
@@ -767,7 +781,7 @@ class PortalTests(TestCase):
         self.assertIn('class="sidebar"', body)
         self.assertIn("side-nav", body)
         self.assertIn("topbar-blue", body)
-        self.assertIn("css/shell.css", body)
+        self.assertLinked(body, "css/shell.css")
 
     def test_hidden_attribute_is_not_overridden(self):
         """
@@ -872,8 +886,8 @@ class PortalTests(TestCase):
     def test_animation_assets_are_linked(self):
         self.login()
         body = self.client.get(reverse("portal:home")).content.decode()
-        self.assertIn("css/anim.css", body)
-        self.assertIn("js/anim.js", body)
+        self.assertLinked(body, "css/anim.css")
+        self.assertLinked(body, "js/anim.js")
 
     # ================= buying trends =================
     def test_trends_are_seeded_per_region(self):

@@ -1,0 +1,17 @@
+# One-click deploy of the demo. In Render: New -> Blueprint -> pick this repo.
+services:
+  - type: web
+    name: spectrum-incentive-portal
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn agentportal.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.10"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true      # a fresh random key, never committed
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: WEB_CONCURRENCY
+        value: "2"

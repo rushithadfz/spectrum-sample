@@ -1,0 +1,8 @@
+# Normalise to LF in the repository.
+* text=auto
+
+# These run on Linux. With CRLF endings the shebang line becomes
+# "#!/usr/bin/env bash\r" and the kernel reports "no such file or directory",
+# which is a genuinely confusing way for a deploy to fail.
+*.sh text eol=lf
+build.sh text eol=lf

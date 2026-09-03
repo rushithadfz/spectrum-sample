@@ -8,6 +8,11 @@ tzdata==2026.3
 # Report downloads (Reports -> PDF).
 reportlab==5.0.1
 
+# Serving. gunicorn runs the app; whitenoise serves the collected static
+# files, which Django itself will not do once DEBUG is off.
+gunicorn==26.2.0
+whitenoise==6.12.0
+
 # Optional: lets the in-portal assistant answer through Claude. Without it
 # the assistant falls back to matching questions against the database, so
 # the portal runs fine with this uninstalled.

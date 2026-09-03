@@ -33,6 +33,12 @@ DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
+# Render assigns the hostname at deploy time and exposes it here.
+_render_host = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if _render_host:
+    ALLOWED_HOSTS.append(_render_host)
+    CSRF_TRUSTED_ORIGINS = [f'https://{_render_host}']
+
 
 # Application definition
 
@@ -50,6 +56,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -129,6 +136,17 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Compressed, hashed filenames so a deploy cannot serve a stale stylesheet
+# from someone's cache.
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 
 # --- Authentication -------------------------------------------------------
 LOGIN_URL = 'login'
